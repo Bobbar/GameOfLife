@@ -35,7 +35,16 @@
             this.numAliveLabel = new System.Windows.Forms.Label();
             this.loadButton = new System.Windows.Forms.Button();
             this.stepButton = new System.Windows.Forms.Button();
+            this.ruleComboBox = new System.Windows.Forms.ComboBox();
+            this.useOpenCLCheckBox = new System.Windows.Forms.CheckBox();
+            this.rowsTextBox = new System.Windows.Forms.TextBox();
+            this.colsTextBox = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.applyButton = new System.Windows.Forms.Button();
+            this.stepsNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox
@@ -43,21 +52,20 @@
             this.pictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox.BackColor = System.Drawing.Color.White;
             this.pictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBox.Location = new System.Drawing.Point(189, 6);
+            this.pictureBox.Location = new System.Drawing.Point(246, 6);
             this.pictureBox.Name = "pictureBox";
-            this.pictureBox.Size = new System.Drawing.Size(618, 607);
+            this.pictureBox.Size = new System.Drawing.Size(847, 772);
             this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox.TabIndex = 0;
             this.pictureBox.TabStop = false;
             this.pictureBox.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox_Paint);
             this.pictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseDown);
-            this.pictureBox.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.pictureBox_PreviewKeyDown);
             // 
             // startButton
             // 
-            this.startButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.startButton.Location = new System.Drawing.Point(446, 641);
+            this.startButton.Location = new System.Drawing.Point(66, 460);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(91, 37);
             this.startButton.TabIndex = 1;
@@ -68,20 +76,18 @@
             // 
             // randomizeButton
             // 
-            this.randomizeButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.randomizeButton.Location = new System.Drawing.Point(325, 641);
+            this.randomizeButton.Location = new System.Drawing.Point(66, 358);
             this.randomizeButton.Name = "randomizeButton";
-            this.randomizeButton.Size = new System.Drawing.Size(91, 37);
+            this.randomizeButton.Size = new System.Drawing.Size(91, 45);
             this.randomizeButton.TabIndex = 2;
             this.randomizeButton.TabStop = false;
-            this.randomizeButton.Text = "Randomize";
+            this.randomizeButton.Text = "Randomize Cells";
             this.randomizeButton.UseVisualStyleBackColor = true;
             this.randomizeButton.Click += new System.EventHandler(this.randomizeButton_Click);
             // 
             // clearButton
             // 
-            this.clearButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.clearButton.Location = new System.Drawing.Point(716, 641);
+            this.clearButton.Location = new System.Drawing.Point(66, 576);
             this.clearButton.Name = "clearButton";
             this.clearButton.Size = new System.Drawing.Size(91, 37);
             this.clearButton.TabIndex = 3;
@@ -94,28 +100,29 @@
             // 
             this.numAliveLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.numAliveLabel.AutoSize = true;
-            this.numAliveLabel.Location = new System.Drawing.Point(189, 616);
+            this.numAliveLabel.Location = new System.Drawing.Point(12, 766);
             this.numAliveLabel.Name = "numAliveLabel";
             this.numAliveLabel.Size = new System.Drawing.Size(42, 15);
             this.numAliveLabel.TabIndex = 4;
             this.numAliveLabel.Text = "Living:";
+            this.numAliveLabel.Visible = false;
             // 
             // loadButton
             // 
             this.loadButton.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.loadButton.Location = new System.Drawing.Point(35, 230);
+            this.loadButton.Location = new System.Drawing.Point(12, 65);
             this.loadButton.Name = "loadButton";
             this.loadButton.Size = new System.Drawing.Size(91, 37);
             this.loadButton.TabIndex = 5;
             this.loadButton.TabStop = false;
             this.loadButton.Text = "Load";
             this.loadButton.UseVisualStyleBackColor = true;
+            this.loadButton.Visible = false;
             this.loadButton.Click += new System.EventHandler(this.loadButton_Click);
             // 
             // stepButton
             // 
-            this.stepButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.stepButton.Location = new System.Drawing.Point(543, 641);
+            this.stepButton.Location = new System.Drawing.Point(66, 503);
             this.stepButton.Name = "stepButton";
             this.stepButton.Size = new System.Drawing.Size(91, 37);
             this.stepButton.TabIndex = 6;
@@ -124,11 +131,103 @@
             this.stepButton.UseVisualStyleBackColor = true;
             this.stepButton.Click += new System.EventHandler(this.stepButton_Click);
             // 
+            // ruleComboBox
+            // 
+            this.ruleComboBox.FormattingEnabled = true;
+            this.ruleComboBox.Location = new System.Drawing.Point(12, 169);
+            this.ruleComboBox.Name = "ruleComboBox";
+            this.ruleComboBox.Size = new System.Drawing.Size(215, 23);
+            this.ruleComboBox.TabIndex = 7;
+            this.ruleComboBox.SelectedIndexChanged += new System.EventHandler(this.ruleComboBox_SelectedIndexChanged);
+            // 
+            // useOpenCLCheckBox
+            // 
+            this.useOpenCLCheckBox.AutoSize = true;
+            this.useOpenCLCheckBox.Checked = true;
+            this.useOpenCLCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.useOpenCLCheckBox.Location = new System.Drawing.Point(66, 640);
+            this.useOpenCLCheckBox.Name = "useOpenCLCheckBox";
+            this.useOpenCLCheckBox.Size = new System.Drawing.Size(91, 19);
+            this.useOpenCLCheckBox.TabIndex = 8;
+            this.useOpenCLCheckBox.Text = "Use OpenCL";
+            this.useOpenCLCheckBox.UseVisualStyleBackColor = true;
+            this.useOpenCLCheckBox.CheckedChanged += new System.EventHandler(this.useOpenCLCheckBox_CheckedChanged);
+            // 
+            // rowsTextBox
+            // 
+            this.rowsTextBox.Location = new System.Drawing.Point(66, 282);
+            this.rowsTextBox.Name = "rowsTextBox";
+            this.rowsTextBox.Size = new System.Drawing.Size(43, 23);
+            this.rowsTextBox.TabIndex = 9;
+            this.rowsTextBox.Text = "500";
+            // 
+            // colsTextBox
+            // 
+            this.colsTextBox.Location = new System.Drawing.Point(115, 282);
+            this.colsTextBox.Name = "colsTextBox";
+            this.colsTextBox.Size = new System.Drawing.Size(42, 23);
+            this.colsTextBox.TabIndex = 10;
+            this.colsTextBox.Text = "500";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(66, 264);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(63, 15);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "Rows/Cols";
+            // 
+            // applyButton
+            // 
+            this.applyButton.Location = new System.Drawing.Point(66, 311);
+            this.applyButton.Name = "applyButton";
+            this.applyButton.Size = new System.Drawing.Size(91, 27);
+            this.applyButton.TabIndex = 12;
+            this.applyButton.Text = "Apply";
+            this.applyButton.UseVisualStyleBackColor = true;
+            this.applyButton.Click += new System.EventHandler(this.applyButton_Click);
+            // 
+            // stepsNumericUpDown
+            // 
+            this.stepsNumericUpDown.Location = new System.Drawing.Point(66, 431);
+            this.stepsNumericUpDown.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.stepsNumericUpDown.Name = "stepsNumericUpDown";
+            this.stepsNumericUpDown.Size = new System.Drawing.Size(91, 23);
+            this.stepsNumericUpDown.TabIndex = 13;
+            this.stepsNumericUpDown.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.stepsNumericUpDown.ValueChanged += new System.EventHandler(this.stepsNumericUpDown_ValueChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(66, 413);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(87, 15);
+            this.label2.TabIndex = 14;
+            this.label2.Text = "Steps Per Cycle";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1009, 690);
+            this.ClientSize = new System.Drawing.Size(1105, 790);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.stepsNumericUpDown);
+            this.Controls.Add(this.applyButton);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.colsTextBox);
+            this.Controls.Add(this.rowsTextBox);
+            this.Controls.Add(this.useOpenCLCheckBox);
+            this.Controls.Add(this.ruleComboBox);
             this.Controls.Add(this.pictureBox);
             this.Controls.Add(this.stepButton);
             this.Controls.Add(this.loadButton);
@@ -141,6 +240,7 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.Form1_PreviewKeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -155,5 +255,13 @@
         private Label numAliveLabel;
         private Button loadButton;
         private Button stepButton;
+        private ComboBox ruleComboBox;
+        private CheckBox useOpenCLCheckBox;
+        private TextBox rowsTextBox;
+        private TextBox colsTextBox;
+        private Label label1;
+        private Button applyButton;
+        private NumericUpDown stepsNumericUpDown;
+        private Label label2;
     }
 }

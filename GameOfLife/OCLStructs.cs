@@ -17,5 +17,10 @@ namespace GameOfLife
         }
     }
 
+    public struct Rule
+    {
+        public int B;
+        public int S;
+    }
 
 }

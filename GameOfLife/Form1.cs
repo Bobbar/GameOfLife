@@ -6,10 +6,11 @@ namespace GameOfLife
 {
     public partial class Form1 : Form
     {
-        private int rows = 1000;
-        private int cols = 1000;
+        private int rows = 500;
+        private int cols = 500;
         private int padding = 200;
         private const int interval = 10;
+        private int stepsPerCycle = 1;
         private int[,] cells;
         private int[,] nextCells;
         private int numAlive = 0;
@@ -18,8 +19,11 @@ namespace GameOfLife
         private Point cursor = new Point();
 
         private System.Windows.Forms.Timer stepper = new System.Windows.Forms.Timer();
-
+        private List<NamedRule> rules = Rules.LifeRules;
+        private NamedRule currentRule;
         private OpenCLCompute ocl;
+        private int oclGPUIdx = 0;
+        private bool UseOpenCL = true;
 
         public Form1()
         {
@@ -33,7 +37,28 @@ namespace GameOfLife
 
             cellSize = new PointF(pictureBox.Width / (float)cols, pictureBox.Height / (float)rows);
 
-            ocl = new OpenCLCompute(0, new int2() { X = cols, Y = rows });
+            InitOpenCL();
+
+            rowsTextBox.Text = rows.ToString();
+            colsTextBox.Text = cols.ToString();
+            stepsNumericUpDown.Value = stepsPerCycle;
+
+            PopRules();
+        }
+
+        private void PopRules()
+        {
+            foreach (var rule in rules)
+            {
+                ruleComboBox.Items.Add(rule.Name);
+            }
+
+            ruleComboBox.SelectedIndex = 8;
+        }
+
+        private void InitOpenCL()
+        {
+            ocl = new OpenCLCompute(oclGPUIdx, new int2() { X = cols, Y = rows });
         }
 
         private void RandomizeCells()
@@ -66,6 +91,107 @@ namespace GameOfLife
 
             cells = new int[cols, rows];
             nextCells = new int[cols, rows];
+        }
+
+
+
+        private void UpdateCells(int steps, bool useOCL)
+        {
+            // Compute next states.
+            if (useOCL)
+            {
+                ocl.ComputeNextState(ref cells, steps, currentRule.Rule);
+            }
+            else
+            {
+                for (int i = 0; i < steps; i++)
+                {
+                    for (int x = 0; x < cols; x++)
+                    {
+                        for (int y = 0; y < rows; y++)
+                        {
+                            var cell = cells[x, y];
+                            var nAlive = NumLivingNeighbors(x, y);
+
+                            nextCells[x, y] = GetState(cell, nAlive, currentRule.Rule);
+                        }
+                    }
+
+                    var tmp = cells;
+                    cells = nextCells;
+                    nextCells = tmp;
+                }
+            }
+        }
+
+        private int GetState(int current, int nAlive, Rule rules)
+        {
+            if (current == 1)
+            {
+                int next = 0;
+                for (int i = 0; i < 9; i++)
+                {
+                    int srv = 1 << i;
+                    if ((srv & rules.S) != 0)
+                    {
+                        if (nAlive == i)
+                            next = 1;
+                    }
+                }
+
+                return next;
+            }
+            else
+            {
+                int next = 0;
+                for (int i = 0; i < 9; i++)
+                {
+                    int brv = 1 << i;
+                    if ((brv & rules.B) != 0)
+                    {
+                        if (nAlive == i)
+                            next = 1;
+                    }
+                }
+
+                return next;
+            }
+        }
+
+        private int NumLivingNeighbors(int cellX, int cellY)
+        {
+            var living = 0;
+
+            for (int x = -1; x <= 1; x++)
+            {
+                for (int y = -1; y <= 1; y++)
+                {
+                    if (x == 0 && y == 0)
+                        continue;
+
+                    int ox = cellX + x;
+                    int oy = cellY + y;
+
+                    if (ox >= 0 && oy >= 0 && ox < cols && oy < rows)
+                        if (cells[ox, oy] == 1)
+                            living++;
+                }
+            }
+
+            return living;
+        }
+
+        private void Clear()
+        {
+            for (int x = 0; x < cols; x++)
+            {
+                for (int y = 0; y < rows; y++)
+                {
+                    cells[x, y] = 0;
+                }
+            }
+
+            pictureBox.Refresh();
         }
 
         private void ParseState()
@@ -145,108 +271,13 @@ namespace GameOfLife
                         }
                     }
                 }
-
             }
 
-        }
-
-        private void UpdateCells()
-        {
-            const int iterations = 300;
-
-
-            for (int i = 0; i < iterations; i++)
-            {
-                ocl.ComputeNextState(ref cells);
-            }
-
-
-
-            // Compute next states.
-
-            //for (int i = 0; i < iterations; i++)
-            //{
-            //var population = 0;
-
-
-
-            //for (int x = 0; x < cols; x++)
-            //{
-            //    for (int y = 0; y < rows; y++)
-            //    {
-            //        var cell = cells[x, y];
-            //        var nAlive = NumLivingNeighbors(x, y);
-
-            //        nextCells[x, y] = cell;
-
-            //        if (cell == 1)
-            //        {
-            //            if (nAlive < 2)
-            //                nextCells[x, y] = 0;
-
-            //            if (nAlive > 3)
-            //                nextCells[x, y] = 0;
-            //        }
-            //        else
-            //        {
-            //            if (nAlive == 3)
-            //                nextCells[x, y] = 1;
-            //        }
-
-            //        if (nextCells[x, y] == 1)
-            //            population++;
-            //    }
-            //}
-
-            //var tmp = cells;
-            //cells = nextCells;
-            //nextCells = tmp;
-
-            //numAlive = population;
-
-            //}
-        }
-
-        private int NumLivingNeighbors(int cellX, int cellY)
-        {
-            var living = 0;
-
-            for (int x = -1; x <= 1; x++)
-            {
-                for (int y = -1; y <= 1; y++)
-                {
-                    if (x == 0 && y == 0)
-                        continue;
-
-                    int ox = cellX + x;
-                    int oy = cellY + y;
-
-                    if (ox >= 0 && oy >= 0 && ox < cols && oy < rows)
-                        if (cells[ox, oy] == 1)
-                            living++;
-
-                }
-            }
-
-            return living;
-        }
-
-        private void Clear()
-        {
-            for (int x = 0; x < cols; x++)
-            {
-                for (int y = 0; y < rows; y++)
-                {
-                    cells[x, y] = 0;
-                }
-            }
-
-            pictureBox.Refresh();
         }
 
         private void Stepper_Tick(object? sender, EventArgs e)
         {
-            UpdateCells();
+            UpdateCells(stepsPerCycle, UseOpenCL);
             numAliveLabel.Text = $"Alive: {numAlive}";
             pictureBox.Refresh();
         }
@@ -255,12 +286,7 @@ namespace GameOfLife
         {
             e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
 
-            //float sizeX = pictureBox.Width / (float)cols;
-            //float sizeY = pictureBox.Height / (float)rows;
             cellSize = new PointF(pictureBox.Width / (float)cols, pictureBox.Height / (float)rows);
-
-            //float sizeX = 1.0f;
-            //float sizeY = 1.0f;
 
             float posX = 0;
             float posY = 0;
@@ -340,34 +366,9 @@ namespace GameOfLife
 
         private void stepButton_Click(object sender, EventArgs e)
         {
-            UpdateCells();
+            UpdateCells(1, UseOpenCL);
             numAliveLabel.Text = $"Alive: {numAlive}";
             pictureBox.Refresh();
-        }
-
-        private void pictureBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-        {
-            //switch (e.KeyData)
-            //{
-            //    case Keys.Up:
-            //        cursor.Y -= (int)cellSize.Y;
-            //        break;
-
-            //    case Keys.Down:
-            //        cursor.Y += (int)cellSize.Y;
-            //        break;
-
-            //    case Keys.Left:
-            //        cursor.X -= (int)cellSize.X;
-            //        break;
-
-            //    case Keys.Right:
-            //        cursor.X += (int)cellSize.X;
-            //        break;
-
-            //}
-
-            //pictureBox.Refresh();
         }
 
         private void Form1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -397,33 +398,40 @@ namespace GameOfLife
             }
 
             pictureBox.Refresh();
-
-            //switch (e.KeyData)
-            //{
-            //    case Keys.W:
-            //        cursor.Y -= (int)cellSize.Y;
-            //        break;
-
-            //    case Keys.S:
-            //        cursor.Y += (int)cellSize.Y;
-            //        break;
-
-            //    case Keys.A:
-            //        cursor.X -= (int)cellSize.X;
-            //        break;
-
-            //    case Keys.D:
-            //        cursor.X += (int)cellSize.X;
-            //        break;
-
-            //}
-
-            //pictureBox.Refresh();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             ocl?.Dispose();
+        }
+
+        private void ruleComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            currentRule = rules[ruleComboBox.SelectedIndex];
+        }
+
+        private void useOpenCLCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            UseOpenCL = useOpenCLCheckBox.Checked;
+        }
+
+        private void applyButton_Click(object sender, EventArgs e)
+        {
+            int newRows, newCols;
+
+            if (int.TryParse(rowsTextBox.Text.Trim(), out newRows) && int.TryParse(colsTextBox.Text.Trim(), out newCols))
+            {
+                rows = newRows;
+                cols = newCols;
+                InitCells();
+                InitOpenCL();
+                pictureBox.Refresh();
+            }
+        }
+
+        private void stepsNumericUpDown_ValueChanged(object sender, EventArgs e)
+        {
+            stepsPerCycle = (int)stepsNumericUpDown.Value;
         }
     }
 }

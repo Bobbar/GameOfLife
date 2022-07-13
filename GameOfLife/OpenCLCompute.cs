@@ -19,8 +19,8 @@ namespace GameOfLife
         private ComputeDevice _device;
         private ComputeProgram _program;
 
-        private ComputeBuffer<int> _cellsA;
-        private ComputeBuffer<int> _cellsB;
+        private ComputeBuffer<int> _gpuCellsA;
+        private ComputeBuffer<int> _gpuCellsB;
 
         private ComputeKernel _computeNextKernel;
 
@@ -46,7 +46,7 @@ namespace GameOfLife
             var platform = _device.Platform;
 
             _context = new ComputeContext(new[] { _device }, new ComputeContextPropertyList(platform), null, IntPtr.Zero);
-            _queue = new ComputeCommandQueue(_context, _device, ComputeCommandQueueFlags.None);
+            _queue = new ComputeCommandQueue(_context, _device, ComputeCommandQueueFlags.Profiling);
 
             var kernelPath = $@"{Environment.CurrentDirectory}\OCLKernels.cl";
             string clSource;
@@ -78,8 +78,8 @@ namespace GameOfLife
         {
             int len = dims.X * dims.Y;
 
-            _cellsA = new ComputeBuffer<int>(_context, ComputeMemoryFlags.ReadWrite, len);
-            _cellsB = new ComputeBuffer<int>(_context, ComputeMemoryFlags.ReadWrite, len);
+            _gpuCellsA = new ComputeBuffer<int>(_context, ComputeMemoryFlags.ReadWrite, len);
+            _gpuCellsB = new ComputeBuffer<int>(_context, ComputeMemoryFlags.ReadWrite, len);
         }
 
         private List<ComputeDevice> GetDevices()
@@ -97,25 +97,8 @@ namespace GameOfLife
             return devices;
         }
 
-        private int BlockCount(int len, int threads = 0)
-        {
-            if (threads == 0)
-                threads = _threadsPerBlock;
-
-            int blocks = len / threads;
-            int mod = len % threads;
-
-            if (mod > 0)
-                blocks += 1;
-
-            return blocks;
-        }
-
         private int PadSize(int len)
         {
-            // Radix sort input length must be divisible by this value.
-            //const int radixMulti = 1024;
-
             if (len < _threadsPerBlock)
                 return _threadsPerBlock;
 
@@ -124,19 +107,27 @@ namespace GameOfLife
             return padLen;
         }
 
-
-        public void ComputeNextState(ref int[,] cells)
+        public void ComputeNextState(ref int[,] cells, int steps, Rule rule)
         {
             int len = _dims.X * _dims.Y;
             int2 padDims = new int2() { X = PadSize(_dims.X), Y = PadSize(_dims.Y) };
 
-            _queue.WriteToBuffer(cells, _cellsA, true, new SysIntX2(0, 0), new SysIntX2(0, 0), new SysIntX2(_dims.X, _dims.Y), null);
+            _queue.WriteToBuffer(cells, _gpuCellsA, true, new SysIntX2(0, 0), new SysIntX2(0, 0), new SysIntX2(_dims.X, _dims.Y), null);
 
-            _computeNextKernel.SetMemoryArgument(0, _cellsA);
-            _computeNextKernel.SetMemoryArgument(1, _cellsB);
-            _computeNextKernel.SetValueArgument(2, _dims);
-            _computeNextKernel.SetValueArgument(3, len);
-            _queue.Execute(_computeNextKernel, null, new long[] { padDims.X, padDims.Y }, new long[] { _threadsPerBlock, _threadsPerBlock }, null);
+            for (int i = 0; i < steps; i++)
+            {
+                _computeNextKernel.SetMemoryArgument(0, _gpuCellsA);
+                _computeNextKernel.SetMemoryArgument(1, _gpuCellsB);
+                _computeNextKernel.SetValueArgument(2, _dims);
+                _computeNextKernel.SetValueArgument(3, len);
+                _computeNextKernel.SetValueArgument(4, rule);
+                _queue.Execute(_computeNextKernel, null, new long[] { padDims.X, padDims.Y }, new long[] { _threadsPerBlock, _threadsPerBlock }, null);
+
+                var temp = _gpuCellsA;
+                _gpuCellsA = _gpuCellsB;
+                _gpuCellsB = temp;
+            }
+
             _queue.Finish();
 
             GCHandle destinationGCHandle = GCHandle.Alloc(cells, GCHandleType.Pinned);
@@ -144,7 +135,7 @@ namespace GameOfLife
 
             Cloo.Bindings.CL12.EnqueueReadBuffer(
                   _queue.Handle,
-                  _cellsB.Handle,
+                  _gpuCellsA.Handle,
                   true,
                   new IntPtr(0 * 4),
                   new IntPtr(len * 4),
@@ -170,8 +161,8 @@ namespace GameOfLife
             _context?.Dispose();
             _queue?.Dispose();
             _program?.Dispose();
-            _cellsA?.Dispose();
-            _cellsB?.Dispose();
+            _gpuCellsA?.Dispose();
+            _gpuCellsB?.Dispose();
             _computeNextKernel?.Dispose();
         }
     }
