@@ -1,6 +1,8 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace GameOfLife
 {
@@ -13,10 +15,9 @@ namespace GameOfLife
         private int stepsPerCycle = 1;
         private int[,] cells;
         private int[,] nextCells;
-        private int numAlive = 0;
+        private int population = 0;
 
         private PointF cellSize = new PointF();
-        private Point cursor = new Point();
 
         private System.Windows.Forms.Timer stepper = new System.Windows.Forms.Timer();
         private List<NamedRule> rules = Rules.LifeRules;
@@ -24,6 +25,8 @@ namespace GameOfLife
         private OpenCLCompute ocl;
         private int oclGPUIdx = 0;
         private bool UseOpenCL = true;
+        private Bitmap cellFieldImg;
+        private byte[] fieldPixels = new byte[1];
 
         public Form1()
         {
@@ -36,6 +39,8 @@ namespace GameOfLife
             stepper.Tick += Stepper_Tick;
 
             cellSize = new PointF(pictureBox.Width / (float)cols, pictureBox.Height / (float)rows);
+
+            InitFieldImage();
 
             InitOpenCL();
 
@@ -60,6 +65,15 @@ namespace GameOfLife
         {
             ocl = new OpenCLCompute(oclGPUIdx, new int2() { X = cols, Y = rows });
         }
+
+        private void InitFieldImage()
+        {
+            cellFieldImg?.Dispose();
+            cellFieldImg = new Bitmap(cols, rows);
+
+            pictureBox.Image = cellFieldImg;
+        }
+
 
         private void RandomizeCells()
         {
@@ -92,8 +106,6 @@ namespace GameOfLife
             cells = new int[cols, rows];
             nextCells = new int[cols, rows];
         }
-
-
 
         private void UpdateCells(int steps, bool useOCL)
         {
@@ -191,7 +203,7 @@ namespace GameOfLife
                 }
             }
 
-            pictureBox.Refresh();
+            RedrawFieldImage();
         }
 
         private void ParseState()
@@ -278,36 +290,44 @@ namespace GameOfLife
         private void Stepper_Tick(object? sender, EventArgs e)
         {
             UpdateCells(stepsPerCycle, UseOpenCL);
-            numAliveLabel.Text = $"Alive: {numAlive}";
-            pictureBox.Refresh();
+            numAliveLabel.Text = $"Population: {population}";
+            RedrawFieldImage();
         }
 
-        private void pictureBox_Paint(object sender, PaintEventArgs e)
+        private void RedrawFieldImage()
         {
-            e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+            population = 0;
 
-            cellSize = new PointF(pictureBox.Width / (float)cols, pictureBox.Height / (float)rows);
+            var data = cellFieldImg.LockBits(new Rectangle(0, 0, cols, rows), ImageLockMode.ReadWrite, cellFieldImg.PixelFormat);
+            int bytes = Math.Abs(data.Stride) * cellFieldImg.Height;
+           
+            if (fieldPixels.Length != bytes)
+                fieldPixels = new byte[bytes];
 
-            float posX = 0;
-            float posY = 0;
+            Marshal.Copy(data.Scan0, fieldPixels, 0, fieldPixels.Length);
 
             for (int x = 0; x < cols; x++)
             {
-                posY = 0;
                 for (int y = 0; y < rows; y++)
                 {
                     var cell = cells[x, y];
+                    int pidx = (x * rows + y) * 4;
 
                     if (cell == 1)
-                        e.Graphics.FillRectangle(Brushes.Black, posX, posY, cellSize.X, cellSize.Y);
-
-                    posY += cellSize.Y;
+                    {
+                        fieldPixels[pidx + 3] = 255;
+                        population++;
+                    }
+                    else
+                    {
+                        fieldPixels[pidx + 3] = 0;
+                    }
                 }
-                posX += cellSize.X;
             }
 
-            e.Graphics.DrawRectangle(Pens.Red, cursor.X * cellSize.X, cursor.Y * cellSize.Y, cellSize.X, cellSize.Y);
-
+            Marshal.Copy(fieldPixels, 0, data.Scan0, fieldPixels.Length);
+            cellFieldImg.UnlockBits(data);
+            pictureBox.Refresh();
         }
 
         private void startButton_Click(object sender, EventArgs e)
@@ -326,30 +346,10 @@ namespace GameOfLife
             }
         }
 
-        private void pictureBox_MouseDown(object sender, MouseEventArgs e)
-        {
-            cellSize = new PointF(pictureBox.Width / (float)cols, pictureBox.Height / (float)rows);
-
-
-            var pos = e.Location;
-            var cellIdx = new Point();
-
-            cellIdx.X = (int)(pos.X / cellSize.X);
-            cellIdx.Y = (int)(pos.Y / cellSize.Y);
-
-            cursor = cellIdx;
-
-            cells[cellIdx.X, cellIdx.Y] = cells[cellIdx.X, cellIdx.Y] == 1 ? 0 : 1;
-
-            Debug.WriteLine($"Pos: {pos}  Idx: {cellIdx}");
-
-            pictureBox.Refresh();
-        }
-
         private void randomizeButton_Click(object sender, EventArgs e)
         {
             RandomizeCells();
-            pictureBox.Refresh();
+            RedrawFieldImage();
         }
 
         private void clearButton_Click(object sender, EventArgs e)
@@ -360,44 +360,14 @@ namespace GameOfLife
         private void loadButton_Click(object sender, EventArgs e)
         {
             ParseState();
-            pictureBox.Refresh();
-
+            RedrawFieldImage();
         }
 
         private void stepButton_Click(object sender, EventArgs e)
         {
             UpdateCells(1, UseOpenCL);
-            numAliveLabel.Text = $"Alive: {numAlive}";
-            pictureBox.Refresh();
-        }
-
-        private void Form1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-        {
-            switch (e.KeyData)
-            {
-                case Keys.W:
-                    cursor.Y -= 1;
-                    break;
-
-                case Keys.S:
-                    cursor.Y += 1;
-                    break;
-
-                case Keys.A:
-                    cursor.X -= 1;
-                    break;
-
-                case Keys.D:
-                    cursor.X += 1;
-                    break;
-
-                case Keys.Space:
-                    cells[cursor.X, cursor.Y] = cells[cursor.X, cursor.Y] == 1 ? 0 : 1;
-                    break;
-
-            }
-
-            pictureBox.Refresh();
+            numAliveLabel.Text = $"Alive: {population}";
+            RedrawFieldImage();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -425,7 +395,8 @@ namespace GameOfLife
                 cols = newCols;
                 InitCells();
                 InitOpenCL();
-                pictureBox.Refresh();
+                InitFieldImage();
+                RedrawFieldImage();
             }
         }
 

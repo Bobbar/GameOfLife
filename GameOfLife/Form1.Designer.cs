@@ -57,11 +57,9 @@
             this.pictureBox.Location = new System.Drawing.Point(246, 6);
             this.pictureBox.Name = "pictureBox";
             this.pictureBox.Size = new System.Drawing.Size(847, 772);
-            this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox.TabIndex = 0;
             this.pictureBox.TabStop = false;
-            this.pictureBox.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox_Paint);
-            this.pictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseDown);
             // 
             // startButton
             // 
@@ -102,10 +100,9 @@
             this.numAliveLabel.AutoSize = true;
             this.numAliveLabel.Location = new System.Drawing.Point(12, 766);
             this.numAliveLabel.Name = "numAliveLabel";
-            this.numAliveLabel.Size = new System.Drawing.Size(42, 15);
+            this.numAliveLabel.Size = new System.Drawing.Size(68, 15);
             this.numAliveLabel.TabIndex = 4;
-            this.numAliveLabel.Text = "Living:";
-            this.numAliveLabel.Visible = false;
+            this.numAliveLabel.Text = "Population:";
             // 
             // loadButton
             // 
@@ -238,7 +235,6 @@
             this.Name = "Form1";
             this.Text = "Form1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.Form1_PreviewKeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).EndInit();
             this.ResumeLayout(false);
