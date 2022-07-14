@@ -8,6 +8,7 @@ namespace GameOfLife
 {
     public static class Rules
     {
+        // https://conwaylife.com/wiki/List_of_Life-like_cellular_automata
         public static List<NamedRule> LifeRules = new List<NamedRule>()
         {
             new NamedRule("Replicator", "B1357/S1357"),
@@ -24,7 +25,19 @@ namespace GameOfLife
             new NamedRule("Move", "B368/S245"),
             new NamedRule("Day & Night", "B3678/S34678"),
             new NamedRule("DryLife", "B37/S23"),
-            new NamedRule("Pedestrian Life", "B38/S23")
+            new NamedRule("Pedestrian Life", "B38/S23"),
+            new NamedRule("Serviettes", "B234/S"),
+            new NamedRule("Iceballs", "B25678/S5678"),
+            new NamedRule("Flock", "B3/S12"),
+            new NamedRule("Coral", "B3/S45678"),
+            new NamedRule("Long Life", "B345/S5"),
+            new NamedRule("Mazectric with Mice", "B37/S1234"),
+            new NamedRule("Maze with Mice", "B37/S12345"),
+            new NamedRule("Vote 4/5", "B4678/S35678"),
+            new NamedRule("H-trees", "B1/S012345678"),
+            new NamedRule("Gnarl", "B1/S1"),
+
+
         };
     }
 }

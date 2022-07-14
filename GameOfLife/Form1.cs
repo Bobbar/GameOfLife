@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
+
 namespace GameOfLife
 {
     public partial class Form1 : Form
@@ -15,7 +16,6 @@ namespace GameOfLife
         private int stepsPerCycle = 1;
         private int[,] cells;
         private int[,] nextCells;
-        private int population = 0;
 
         private PointF cellSize = new PointF();
 
@@ -26,7 +26,6 @@ namespace GameOfLife
         private int oclGPUIdx = 0;
         private bool UseOpenCL = true;
         private Bitmap cellFieldImg;
-        private byte[] fieldPixels = new byte[1];
 
         public Form1()
         {
@@ -63,6 +62,7 @@ namespace GameOfLife
 
         private void InitOpenCL()
         {
+            ocl?.Dispose();
             ocl = new OpenCLCompute(oclGPUIdx, new int2() { X = cols, Y = rows });
         }
 
@@ -73,7 +73,6 @@ namespace GameOfLife
 
             pictureBox.Image = cellFieldImg;
         }
-
 
         private void RandomizeCells()
         {
@@ -290,43 +289,39 @@ namespace GameOfLife
         private void Stepper_Tick(object? sender, EventArgs e)
         {
             UpdateCells(stepsPerCycle, UseOpenCL);
-            numAliveLabel.Text = $"Population: {population}";
             RedrawFieldImage();
         }
 
-        private void RedrawFieldImage()
+        private unsafe void RedrawFieldImage()
         {
-            population = 0;
+            int population = 0;
 
+            // Write the cells directly to the bitmap.
             var data = cellFieldImg.LockBits(new Rectangle(0, 0, cols, rows), ImageLockMode.ReadWrite, cellFieldImg.PixelFormat);
-            int bytes = Math.Abs(data.Stride) * cellFieldImg.Height;
-           
-            if (fieldPixels.Length != bytes)
-                fieldPixels = new byte[bytes];
-
-            Marshal.Copy(data.Scan0, fieldPixels, 0, fieldPixels.Length);
+            byte* pixels = (byte*)data.Scan0;
 
             for (int x = 0; x < cols; x++)
             {
                 for (int y = 0; y < rows; y++)
                 {
                     var cell = cells[x, y];
-                    int pidx = (x * rows + y) * 4;
+                    int pidx = (y * cols + x) * 4;
 
                     if (cell == 1)
                     {
-                        fieldPixels[pidx + 3] = 255;
+                        pixels[pidx + 3] = 255;
                         population++;
                     }
                     else
                     {
-                        fieldPixels[pidx + 3] = 0;
+                        pixels[pidx + 3] = 10;
                     }
                 }
             }
 
-            Marshal.Copy(fieldPixels, 0, data.Scan0, fieldPixels.Length);
             cellFieldImg.UnlockBits(data);
+
+            numAliveLabel.Text = $"Population: {population}";
             pictureBox.Refresh();
         }
 
@@ -366,7 +361,6 @@ namespace GameOfLife
         private void stepButton_Click(object sender, EventArgs e)
         {
             UpdateCells(1, UseOpenCL);
-            numAliveLabel.Text = $"Alive: {population}";
             RedrawFieldImage();
         }
 
@@ -403,6 +397,50 @@ namespace GameOfLife
         private void stepsNumericUpDown_ValueChanged(object sender, EventArgs e)
         {
             stepsPerCycle = (int)stepsNumericUpDown.Value;
+        }
+
+        private void pictureBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            var posScaled = TranslateZoomMousePosition(e.Location);
+
+            var cellIdx = new Point(posScaled.X, posScaled.Y);
+
+            if (cellIdx.X >= 0 && cellIdx.X <= cols && cellIdx.Y >= 0 && cellIdx.Y <= rows)
+                cells[cellIdx.X, cellIdx.Y] = cells[cellIdx.X, cellIdx.Y] == 1 ? 0 : 1;
+
+            RedrawFieldImage();
+        }
+
+        private Point TranslateZoomMousePosition(Point coordinates)
+        {
+            if (pictureBox.Width == 0 || pictureBox.Height == 0 || cols == 0 || rows == 0) return coordinates;
+            float imageAspect = (float)cols / rows;
+            float controlAspect = (float)pictureBox.Width / pictureBox.Height;
+            float newX = coordinates.X;
+            float newY = coordinates.Y;
+            if (imageAspect > controlAspect)
+            {
+                float ratioWidth = (float)cols / pictureBox.Width;
+                newX *= ratioWidth;
+                float scale = (float)pictureBox.Width / cols;
+                float displayHeight = scale * rows;
+                float diffHeight = Height - displayHeight;
+                diffHeight /= 2;
+                newY -= diffHeight;
+                newY /= scale;
+            }
+            else
+            {
+                float ratioHeight = (float)rows / pictureBox.Height;
+                newY *= ratioHeight;
+                float scale = (float)pictureBox.Height / rows;
+                float displayWidth = scale * cols;
+                float diffWidth = pictureBox.Width - displayWidth;
+                diffWidth /= 2;
+                newX -= diffWidth;
+                newX /= scale;
+            }
+            return new Point((int)newX, (int)newY);
         }
     }
 }
