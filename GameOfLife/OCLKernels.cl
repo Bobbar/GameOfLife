@@ -1,25 +1,25 @@
-﻿typedef struct 
+﻿typedef struct
 {
-    int B;
-    int S;
+	int B;
+	int S;
 
 } Rule;
 
 
 int cIdx(int x, int y, int2 dims);
-int cIdx(int x, int y, int2 dims) 
+int cIdx(int x, int y, int2 dims)
 {
-    return x * dims.y + y;
+	return y * dims.x + x;
 }
 
 int NumLivingNeighbors(int cellX, int cellY, int2 dims, global int* cells);
 int NumLivingNeighbors(int cellX, int cellY, int2 dims, global int* cells)
 {
-	int living = 0;
+    int living = 0;
 
-    for (int x = -1; x <= 1; x++)
+    for (int y = -1; y <= 1; y++)
     {
-        for (int y = -1; y <= 1; y++)
+        for (int x = -1; x <= 1; x++)
         {
             if (x == 0 && y == 0)
                 continue;
@@ -37,58 +37,36 @@ int NumLivingNeighbors(int cellX, int cellY, int2 dims, global int* cells)
     return living;
 }
 
-
 int GetState(int current, int nAlive, Rule rules);
-int GetState(int current, int nAlive, Rule rules) 
+int GetState(int current, int nAlive, Rule rules)
 {
-    if (current == 1) 
-    {
-        int next = 0;
-        for (int i = 0; i < 9; i++) 
-        {
-            int srv = 1 << i;
-            if ((srv & rules.S) != 0) 
-            {
-                if (nAlive == i)
-                    next = 1;
-            }
-        }
+	int next = 0;
+	// Select the appropriate rule based on the current state.
+	int rule = select(rules.B, rules.S, current);
+	for (int i = 0; i < 9; i++)
+	{
+		int ruleVal = 1 << i;
+		if ((ruleVal & rule) != 0)
+		{
+			if (nAlive == i)
+				next = 1;
+		}
+	}
 
-        return next;
-    }
-    else 
-    {
-        int next = 0;
-        for (int i = 0; i < 9; i++)
-        {
-            int brv = 1 << i;
-            if ((brv & rules.B) != 0)
-            {
-                if (nAlive == i)
-                    next = 1;
-            }
-        }
-
-        return next;
-    }
+	return next;
 }
 
-__kernel void ComputeNextState(global int* curState, global int* nextState, int2 dims, int len, Rule rule) 
+__kernel void ComputeNextState(global int* curState, global int* nextState, int2 dims, int len, Rule rule)
 {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
-	int gid = get_global_linear_id();
 
-    if (x >= dims.x || y >= dims.y)
-        return;
+	if (x >= dims.x || y >= dims.y)
+		return;
 
-    int cellIdx = cIdx(x, y, dims);
-    int nAlive = NumLivingNeighbors(x, y, dims, curState);
+	int cellIdx = cIdx(x, y, dims);
+	int nAlive = NumLivingNeighbors(x, y, dims, curState);
+	int curCell = curState[cellIdx];
 
-    int curCell = curState[cellIdx];
-    int nextCell = curCell;
-
-    nextCell = GetState(nextCell, nAlive, rule);
-
-    nextState[cellIdx] = nextCell;
+	nextState[cellIdx] = GetState(curCell, nAlive, rule);
 }

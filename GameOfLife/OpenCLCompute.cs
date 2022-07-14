@@ -126,12 +126,17 @@ namespace GameOfLife
                 var temp = _gpuCellsA;
                 _gpuCellsA = _gpuCellsB;
                 _gpuCellsB = temp;
-            }
+            } 
 
             _queue.Finish();
 
-            GCHandle destinationGCHandle = GCHandle.Alloc(cells, GCHandleType.Pinned);
-            IntPtr destinationOffsetPtr = Marshal.UnsafeAddrOfPinnedArrayElement(cells, 0);
+            ReadBuffer(_gpuCellsA, ref cells, len);
+        }
+
+        private void ReadBuffer(ComputeBuffer<int> source, ref int[,] dest, int len)
+        {
+            GCHandle destinationGCHandle = GCHandle.Alloc(dest, GCHandleType.Pinned);
+            IntPtr destinationOffsetPtr = Marshal.UnsafeAddrOfPinnedArrayElement(dest, 0);
 
             Cloo.Bindings.CL12.EnqueueReadBuffer(
                   _queue.Handle,
@@ -145,15 +150,6 @@ namespace GameOfLife
                   null);
 
             destinationGCHandle.Free();
-        }
-
-        private T[] ReadBuffer<T>(ComputeBuffer<T> buffer, bool blocking = false) where T : struct
-        {
-            T[] buf = new T[buffer.Count];
-
-            _queue.ReadFromBuffer(buffer, ref buf, blocking, null);
-
-            return buf;
         }
 
         public void Dispose()

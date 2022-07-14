@@ -11,16 +11,13 @@ namespace GameOfLife
     {
         private int rows = 500;
         private int cols = 500;
-        private int padding = 200;
         private const int interval = 10;
         private int stepsPerCycle = 1;
         private int[,] cells;
         private int[,] nextCells;
 
-        private PointF cellSize = new PointF();
-
         private System.Windows.Forms.Timer stepper = new System.Windows.Forms.Timer();
-        private List<NamedRule> rules = Rules.LifeRules;
+        private readonly List<NamedRule> rules = Rules.LifeRules;
         private NamedRule currentRule;
         private OpenCLCompute ocl;
         private int oclGPUIdx = 0;
@@ -31,23 +28,20 @@ namespace GameOfLife
         {
             InitializeComponent();
 
-            cells = new int[cols, rows];
-            nextCells = new int[cols, rows];
+            InitCells();
 
             stepper.Interval = interval;
             stepper.Tick += Stepper_Tick;
-
-            cellSize = new PointF(pictureBox.Width / (float)cols, pictureBox.Height / (float)rows);
 
             InitFieldImage();
 
             InitOpenCL();
 
+            PopRules();
+
             rowsTextBox.Text = rows.ToString();
             colsTextBox.Text = cols.ToString();
             stepsNumericUpDown.Value = stepsPerCycle;
-
-            PopRules();
         }
 
         private void PopRules()
@@ -74,6 +68,12 @@ namespace GameOfLife
             pictureBox.Image = cellFieldImg;
         }
 
+        private void InitCells()
+        {
+            cells = new int[cols, rows];
+            nextCells = new int[cols, rows];
+        }
+
         private void RandomizeCells()
         {
             var rnd = new Random();
@@ -87,23 +87,6 @@ namespace GameOfLife
 
                 cells[rndX, rndY] = rnd.Next(2);
             }
-
-
-
-            //for (int x = 0; x < rows; x++)
-            //{
-            //    for (int y = 0; y < rows; y++)
-            //    {
-            //        cells[x, y] = Convert.Tointean(rnd.Next(2));
-            //    }
-            //}
-        }
-
-        private void InitCells()
-        {
-
-            cells = new int[cols, rows];
-            nextCells = new int[cols, rows];
         }
 
         private void UpdateCells(int steps, bool useOCL)
@@ -117,16 +100,18 @@ namespace GameOfLife
             {
                 for (int i = 0; i < steps; i++)
                 {
-                    for (int x = 0; x < cols; x++)
+                    ParallelHelpers.ParallelForSlim(cols, 8, (start, len) =>
                     {
-                        for (int y = 0; y < rows; y++)
+                        for (int x = start; x < len; x++)
                         {
-                            var cell = cells[x, y];
-                            var nAlive = NumLivingNeighbors(x, y);
-
-                            nextCells[x, y] = GetState(cell, nAlive, currentRule.Rule);
+                            for (int y = 0; y < rows; y++)
+                            {
+                                var cell = cells[x, y];
+                                var nAlive = NumLivingNeighbors(x, y);
+                                nextCells[x, y] = GetState(cell, nAlive, currentRule.Rule);
+                            }
                         }
-                    }
+                    });
 
                     var tmp = cells;
                     cells = nextCells;
@@ -137,36 +122,19 @@ namespace GameOfLife
 
         private int GetState(int current, int nAlive, Rule rules)
         {
-            if (current == 1)
+            int next = 0;
+            int rule = current == 1 ? rules.S : rules.B;
+            for (int i = 0; i < 9; i++)
             {
-                int next = 0;
-                for (int i = 0; i < 9; i++)
+                int ruleVal = 1 << i;
+                if ((ruleVal & rule) != 0)
                 {
-                    int srv = 1 << i;
-                    if ((srv & rules.S) != 0)
-                    {
-                        if (nAlive == i)
-                            next = 1;
-                    }
+                    if (nAlive == i)
+                        next = 1;
                 }
-
-                return next;
             }
-            else
-            {
-                int next = 0;
-                for (int i = 0; i < 9; i++)
-                {
-                    int brv = 1 << i;
-                    if ((brv & rules.B) != 0)
-                    {
-                        if (nAlive == i)
-                            next = 1;
-                    }
-                }
 
-                return next;
-            }
+            return next;
         }
 
         private int NumLivingNeighbors(int cellX, int cellY)
@@ -217,6 +185,7 @@ namespace GameOfLife
             int sizeY = 0;
             int x = 0;
             int y = 0;
+            int padding = 200;
             foreach (var line in File.ReadLines(file))
             {
                 if (line[0] == 'x')
@@ -300,6 +269,7 @@ namespace GameOfLife
             var data = cellFieldImg.LockBits(new Rectangle(0, 0, cols, rows), ImageLockMode.ReadWrite, cellFieldImg.PixelFormat);
             byte* pixels = (byte*)data.Scan0;
 
+            const int alphaOffset = 3;
             for (int x = 0; x < cols; x++)
             {
                 for (int y = 0; y < rows; y++)
@@ -309,12 +279,12 @@ namespace GameOfLife
 
                     if (cell == 1)
                     {
-                        pixels[pidx + 3] = 255;
+                        pixels[pidx + alphaOffset] = 255;
                         population++;
                     }
                     else
                     {
-                        pixels[pidx + 3] = 10;
+                        pixels[pidx + alphaOffset] = 10;
                     }
                 }
             }
@@ -391,6 +361,11 @@ namespace GameOfLife
                 InitOpenCL();
                 InitFieldImage();
                 RedrawFieldImage();
+            }
+            else
+            {
+                rowsTextBox.Text = rows.ToString();
+                colsTextBox.Text = cols.ToString();
             }
         }
 
