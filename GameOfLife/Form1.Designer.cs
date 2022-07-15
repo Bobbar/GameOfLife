@@ -43,6 +43,7 @@
             this.applyButton = new System.Windows.Forms.Button();
             this.stepsNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
+            this.invertCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).BeginInit();
             this.SuspendLayout();
@@ -213,11 +214,23 @@
             this.label2.TabIndex = 14;
             this.label2.Text = "Steps Per Cycle";
             // 
+            // invertCheckBox
+            // 
+            this.invertCheckBox.AutoSize = true;
+            this.invertCheckBox.Location = new System.Drawing.Point(147, 12);
+            this.invertCheckBox.Name = "invertCheckBox";
+            this.invertCheckBox.Size = new System.Drawing.Size(93, 19);
+            this.invertCheckBox.TabIndex = 15;
+            this.invertCheckBox.Text = "Invert Colors";
+            this.invertCheckBox.UseVisualStyleBackColor = true;
+            this.invertCheckBox.CheckedChanged += new System.EventHandler(this.invertCheckBox_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1105, 790);
+            this.Controls.Add(this.invertCheckBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.stepsNumericUpDown);
             this.Controls.Add(this.applyButton);
@@ -260,5 +273,6 @@
         private Button applyButton;
         private NumericUpDown stepsNumericUpDown;
         private Label label2;
+        private CheckBox invertCheckBox;
     }
 }

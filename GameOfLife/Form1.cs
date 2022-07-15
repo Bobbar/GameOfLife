@@ -15,6 +15,7 @@ namespace GameOfLife
         private int stepsPerCycle = 1;
         private int[,] cells;
         private int[,] nextCells;
+        private bool invertColors = false;
 
         private System.Windows.Forms.Timer stepper = new System.Windows.Forms.Timer();
         private readonly List<NamedRule> rules = Rules.LifeRules;
@@ -34,6 +35,7 @@ namespace GameOfLife
             stepper.Tick += Stepper_Tick;
 
             InitFieldImage();
+            RedrawFieldImage();
 
             InitOpenCL();
 
@@ -263,13 +265,23 @@ namespace GameOfLife
 
         private unsafe void RedrawFieldImage()
         {
+            const int alphaOffset = 3;
+            const int onAlpha = 255;
+            const int offAlpha = 10;
+            byte aliveAlpha = onAlpha;
+            byte deadAlpha = offAlpha;
             int population = 0;
 
+            if (invertColors)
+            {
+                aliveAlpha = offAlpha;
+                deadAlpha = onAlpha;
+            }
+               
             // Write the cells directly to the bitmap.
             var data = cellFieldImg.LockBits(new Rectangle(0, 0, cols, rows), ImageLockMode.ReadWrite, cellFieldImg.PixelFormat);
             byte* pixels = (byte*)data.Scan0;
 
-            const int alphaOffset = 3;
             for (int x = 0; x < cols; x++)
             {
                 for (int y = 0; y < rows; y++)
@@ -279,12 +291,12 @@ namespace GameOfLife
 
                     if (cell == 1)
                     {
-                        pixels[pidx + alphaOffset] = 255;
+                        pixels[pidx + alphaOffset] = aliveAlpha;
                         population++;
                     }
                     else
                     {
-                        pixels[pidx + alphaOffset] = 10;
+                        pixels[pidx + alphaOffset] = deadAlpha;
                     }
                 }
             }
@@ -416,6 +428,12 @@ namespace GameOfLife
                 newX /= scale;
             }
             return new Point((int)newX, (int)newY);
+        }
+
+        private void invertCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            invertColors = invertCheckBox.Checked;
+            RedrawFieldImage();
         }
     }
 }
