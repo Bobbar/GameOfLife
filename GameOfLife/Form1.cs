@@ -311,6 +311,43 @@ namespace GameOfLife
             renderer.Refresh();
         }
 
+        private string GenerateRandomRule()
+        {
+            var rnd = new Random();
+            int bLen = rnd.Next(9);
+            int sLen = rnd.Next(9);
+            string B = string.Empty;
+            string S = string.Empty;
+
+            for (int i = 0; i < bLen; i++)
+            {
+                var rndVal = rnd.Next(9).ToString();
+
+                while (B.Contains(rndVal))
+                    rndVal = rnd.Next(9).ToString();
+
+                B += rndVal;
+
+            }
+
+            B = String.Concat(B.OrderBy(c => c));
+
+            for (int i = 0; i < sLen; i++)
+            {
+                var rndVal = rnd.Next(9).ToString();
+
+                while (S.Contains(rndVal))
+                    rndVal = rnd.Next(9).ToString();
+
+                S += rndVal;
+
+            }
+
+            S = String.Concat(S.OrderBy(c => c));
+
+            return $"B{B}/S{S}";
+        }
+
         private void startButton_Click(object sender, EventArgs e)
         {
             stepper.Enabled = !stepper.Enabled;
@@ -357,7 +394,11 @@ namespace GameOfLife
 
         private void ruleComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (ruleComboBox.SelectedIndex < 0)
+                return;
+
             currentRule = rules[ruleComboBox.SelectedIndex];
+            customRuleTextBox.Clear();
         }
 
         private void useOpenCLCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -404,6 +445,20 @@ namespace GameOfLife
         {
             invertColors = invertCheckBox.Checked;
             RedrawFieldImage();
+        }
+
+        private void randomRuleButton_Click(object sender, EventArgs e)
+        {
+            var rndRule = GenerateRandomRule();
+            currentRule = new NamedRule("Random", rndRule);
+            customRuleTextBox.Text = currentRule.RuleVal;
+            ruleComboBox.SelectedIndex = -1;
+        }
+
+        private void applyRuleButton_Click(object sender, EventArgs e)
+        {
+            currentRule = new NamedRule("Custom", customRuleTextBox.Text.Trim());
+            ruleComboBox.SelectedIndex = -1;
         }
     }
 }

@@ -45,6 +45,9 @@
             this.label2 = new System.Windows.Forms.Label();
             this.invertCheckBox = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.customRuleTextBox = new System.Windows.Forms.TextBox();
+            this.randomRuleButton = new System.Windows.Forms.Button();
+            this.applyRuleButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).BeginInit();
             this.SuspendLayout();
@@ -233,11 +236,41 @@
             this.label3.TabIndex = 16;
             this.label3.Text = "Rule";
             // 
+            // customRuleTextBox
+            // 
+            this.customRuleTextBox.Location = new System.Drawing.Point(93, 198);
+            this.customRuleTextBox.Name = "customRuleTextBox";
+            this.customRuleTextBox.Size = new System.Drawing.Size(134, 23);
+            this.customRuleTextBox.TabIndex = 17;
+            // 
+            // randomRuleButton
+            // 
+            this.randomRuleButton.Location = new System.Drawing.Point(12, 198);
+            this.randomRuleButton.Name = "randomRuleButton";
+            this.randomRuleButton.Size = new System.Drawing.Size(75, 23);
+            this.randomRuleButton.TabIndex = 18;
+            this.randomRuleButton.Text = "Random";
+            this.randomRuleButton.UseVisualStyleBackColor = true;
+            this.randomRuleButton.Click += new System.EventHandler(this.randomRuleButton_Click);
+            // 
+            // applyRuleButton
+            // 
+            this.applyRuleButton.Location = new System.Drawing.Point(115, 227);
+            this.applyRuleButton.Name = "applyRuleButton";
+            this.applyRuleButton.Size = new System.Drawing.Size(75, 23);
+            this.applyRuleButton.TabIndex = 19;
+            this.applyRuleButton.Text = "Apply";
+            this.applyRuleButton.UseVisualStyleBackColor = true;
+            this.applyRuleButton.Click += new System.EventHandler(this.applyRuleButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1109, 756);
+            this.Controls.Add(this.applyRuleButton);
+            this.Controls.Add(this.randomRuleButton);
+            this.Controls.Add(this.customRuleTextBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.invertCheckBox);
             this.Controls.Add(this.label2);
@@ -284,5 +317,8 @@
         private Label label2;
         private CheckBox invertCheckBox;
         private Label label3;
+        private TextBox customRuleTextBox;
+        private Button randomRuleButton;
+        private Button applyRuleButton;
     }
 }

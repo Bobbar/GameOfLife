@@ -36,6 +36,12 @@ namespace GameOfLife
             new NamedRule("Vote 4/5", "B4678/S35678"),
             new NamedRule("H-trees", "B1/S012345678"),
             new NamedRule("Gnarl", "B1/S1"),
+            new NamedRule("DotLife", "B3/S023"),
+            new NamedRule("Bacteria", "B34/S456"),
+            new NamedRule("Gems", "B3457/S4568"),
+            new NamedRule("Stains", "B3678/S235678"),
+            new NamedRule("HoneyLife", "B38/S238"),
+
 
 
         };
