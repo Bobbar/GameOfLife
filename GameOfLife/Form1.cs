@@ -17,13 +17,15 @@ namespace GameOfLife
         private int[,] nextCells;
         private bool invertColors = false;
 
-        private System.Windows.Forms.Timer stepper = new System.Windows.Forms.Timer();
+        private System.Windows.Forms.Timer stepper = new 
+            System.Windows.Forms.Timer();
         private readonly List<NamedRule> rules = Rules.LifeRules;
         private NamedRule currentRule;
         private OpenCLCompute ocl;
         private int oclGPUIdx = 0;
         private bool UseOpenCL = true;
         private Bitmap cellFieldImg;
+        private PanZoomRenderer renderer;
 
         public Form1()
         {
@@ -36,9 +38,7 @@ namespace GameOfLife
 
             InitFieldImage();
             RedrawFieldImage();
-
             InitOpenCL();
-
             PopRules();
 
             rowsTextBox.Text = rows.ToString();
@@ -50,7 +50,7 @@ namespace GameOfLife
         {
             foreach (var rule in rules)
             {
-                ruleComboBox.Items.Add(rule.Name);
+                ruleComboBox.Items.Add($"{rule.Name}  ( {rule.RuleVal} )");
             }
 
             ruleComboBox.SelectedIndex = 8;
@@ -67,7 +67,9 @@ namespace GameOfLife
             cellFieldImg?.Dispose();
             cellFieldImg = new Bitmap(cols, rows);
 
-            pictureBox.Image = cellFieldImg;
+            renderer?.Dispose();
+            renderer = new PanZoomRenderer(cellFieldImg, pictureBox);
+            renderer.MouseDown += Renderer_MouseDown;
         }
 
         private void InitCells()
@@ -277,9 +279,10 @@ namespace GameOfLife
                 aliveAlpha = offAlpha;
                 deadAlpha = onAlpha;
             }
-               
+
             // Write the cells directly to the bitmap.
-            var data = cellFieldImg.LockBits(new Rectangle(0, 0, cols, rows), ImageLockMode.ReadWrite, cellFieldImg.PixelFormat);
+            var data = renderer.Image.LockBits(new Rectangle(0, 0, cols, rows), ImageLockMode.ReadWrite, renderer.Image.PixelFormat);
+
             byte* pixels = (byte*)data.Scan0;
 
             for (int x = 0; x < cols; x++)
@@ -301,10 +304,11 @@ namespace GameOfLife
                 }
             }
 
-            cellFieldImg.UnlockBits(data);
+            renderer.Image.UnlockBits(data);
 
             numAliveLabel.Text = $"Population: {population}";
-            pictureBox.Refresh();
+           
+            renderer.Refresh();
         }
 
         private void startButton_Click(object sender, EventArgs e)
@@ -386,48 +390,14 @@ namespace GameOfLife
             stepsPerCycle = (int)stepsNumericUpDown.Value;
         }
 
-        private void pictureBox_MouseDown(object sender, MouseEventArgs e)
+        private void Renderer_MouseDown(object? sender, MouseEventArgs e)
         {
-            var posScaled = TranslateZoomMousePosition(e.Location);
-
-            var cellIdx = new Point(posScaled.X, posScaled.Y);
+            var cellIdx = e.Location;
 
             if (cellIdx.X >= 0 && cellIdx.X <= cols && cellIdx.Y >= 0 && cellIdx.Y <= rows)
                 cells[cellIdx.X, cellIdx.Y] = cells[cellIdx.X, cellIdx.Y] == 1 ? 0 : 1;
 
             RedrawFieldImage();
-        }
-
-        private Point TranslateZoomMousePosition(Point coordinates)
-        {
-            if (pictureBox.Width == 0 || pictureBox.Height == 0 || cols == 0 || rows == 0) return coordinates;
-            float imageAspect = (float)cols / rows;
-            float controlAspect = (float)pictureBox.Width / pictureBox.Height;
-            float newX = coordinates.X;
-            float newY = coordinates.Y;
-            if (imageAspect > controlAspect)
-            {
-                float ratioWidth = (float)cols / pictureBox.Width;
-                newX *= ratioWidth;
-                float scale = (float)pictureBox.Width / cols;
-                float displayHeight = scale * rows;
-                float diffHeight = Height - displayHeight;
-                diffHeight /= 2;
-                newY -= diffHeight;
-                newY /= scale;
-            }
-            else
-            {
-                float ratioHeight = (float)rows / pictureBox.Height;
-                newY *= ratioHeight;
-                float scale = (float)pictureBox.Height / rows;
-                float displayWidth = scale * cols;
-                float diffWidth = pictureBox.Width - displayWidth;
-                diffWidth /= 2;
-                newX -= diffWidth;
-                newX /= scale;
-            }
-            return new Point((int)newX, (int)newY);
         }
 
         private void invertCheckBox_CheckedChanged(object sender, EventArgs e)

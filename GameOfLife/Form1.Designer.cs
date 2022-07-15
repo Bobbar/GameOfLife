@@ -44,6 +44,7 @@
             this.stepsNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
             this.invertCheckBox = new System.Windows.Forms.CheckBox();
+            this.label3 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).BeginInit();
             this.SuspendLayout();
@@ -57,11 +58,9 @@
             this.pictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox.Location = new System.Drawing.Point(246, 6);
             this.pictureBox.Name = "pictureBox";
-            this.pictureBox.Size = new System.Drawing.Size(847, 772);
-            this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox.Size = new System.Drawing.Size(851, 738);
             this.pictureBox.TabIndex = 0;
             this.pictureBox.TabStop = false;
-            this.pictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseDown);
             // 
             // startButton
             // 
@@ -100,7 +99,7 @@
             // 
             this.numAliveLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.numAliveLabel.AutoSize = true;
-            this.numAliveLabel.Location = new System.Drawing.Point(12, 766);
+            this.numAliveLabel.Location = new System.Drawing.Point(12, 732);
             this.numAliveLabel.Name = "numAliveLabel";
             this.numAliveLabel.Size = new System.Drawing.Size(68, 15);
             this.numAliveLabel.TabIndex = 4;
@@ -109,7 +108,7 @@
             // loadButton
             // 
             this.loadButton.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.loadButton.Location = new System.Drawing.Point(12, 65);
+            this.loadButton.Location = new System.Drawing.Point(12, 48);
             this.loadButton.Name = "loadButton";
             this.loadButton.Size = new System.Drawing.Size(91, 37);
             this.loadButton.TabIndex = 5;
@@ -225,11 +224,21 @@
             this.invertCheckBox.UseVisualStyleBackColor = true;
             this.invertCheckBox.CheckedChanged += new System.EventHandler(this.invertCheckBox_CheckedChanged);
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(12, 151);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(30, 15);
+            this.label3.TabIndex = 16;
+            this.label3.Text = "Rule";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1105, 790);
+            this.ClientSize = new System.Drawing.Size(1109, 756);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.invertCheckBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.stepsNumericUpDown);
@@ -274,5 +283,6 @@
         private NumericUpDown stepsNumericUpDown;
         private Label label2;
         private CheckBox invertCheckBox;
+        private Label label3;
     }
 }
