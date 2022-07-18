@@ -74,19 +74,20 @@ namespace GameOfLife
 
             viewPortGfx.ResetTransform();
             viewPortGfx.ScaleTransform(currentScale, currentScale);
+
+            pictureBox.Image = viewPortImg;
         }
 
         public void Refresh()
         {
             viewPortGfx.Clear(pictureBox.BackColor);
-            
+
             var panZoomOffset = viewPortOffset.Add(scaleOffset);
 
             viewPortGfx.DrawImage(targetImage, new RectangleF(panZoomOffset, targetSize));
 
             buffer.Render();
 
-            pictureBox.Image = viewPortImg;
             pictureBox.Refresh();
         }
 

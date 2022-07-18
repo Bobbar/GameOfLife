@@ -33,7 +33,6 @@
             this.randomizeButton = new System.Windows.Forms.Button();
             this.clearButton = new System.Windows.Forms.Button();
             this.numAliveLabel = new System.Windows.Forms.Label();
-            this.loadButton = new System.Windows.Forms.Button();
             this.stepButton = new System.Windows.Forms.Button();
             this.ruleComboBox = new System.Windows.Forms.ComboBox();
             this.useOpenCLCheckBox = new System.Windows.Forms.CheckBox();
@@ -48,8 +47,13 @@
             this.customRuleTextBox = new System.Windows.Forms.TextBox();
             this.randomRuleButton = new System.Windows.Forms.Button();
             this.applyRuleButton = new System.Windows.Forms.Button();
+            this.aliveContrastNumeric = new System.Windows.Forms.NumericUpDown();
+            this.deadContrastNumeric = new System.Windows.Forms.NumericUpDown();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.aliveContrastNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.deadContrastNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox
@@ -61,19 +65,20 @@
             this.pictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox.Location = new System.Drawing.Point(246, 6);
             this.pictureBox.Name = "pictureBox";
-            this.pictureBox.Size = new System.Drawing.Size(851, 738);
+            this.pictureBox.Size = new System.Drawing.Size(882, 789);
             this.pictureBox.TabIndex = 0;
             this.pictureBox.TabStop = false;
             // 
             // startButton
             // 
+            this.startButton.BackColor = System.Drawing.Color.LightCoral;
             this.startButton.Location = new System.Drawing.Point(66, 460);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(91, 37);
             this.startButton.TabIndex = 1;
             this.startButton.TabStop = false;
             this.startButton.Text = "Start";
-            this.startButton.UseVisualStyleBackColor = true;
+            this.startButton.UseVisualStyleBackColor = false;
             this.startButton.Click += new System.EventHandler(this.startButton_Click);
             // 
             // randomizeButton
@@ -102,24 +107,11 @@
             // 
             this.numAliveLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.numAliveLabel.AutoSize = true;
-            this.numAliveLabel.Location = new System.Drawing.Point(12, 732);
+            this.numAliveLabel.Location = new System.Drawing.Point(12, 783);
             this.numAliveLabel.Name = "numAliveLabel";
             this.numAliveLabel.Size = new System.Drawing.Size(68, 15);
             this.numAliveLabel.TabIndex = 4;
             this.numAliveLabel.Text = "Population:";
-            // 
-            // loadButton
-            // 
-            this.loadButton.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.loadButton.Location = new System.Drawing.Point(12, 48);
-            this.loadButton.Name = "loadButton";
-            this.loadButton.Size = new System.Drawing.Size(91, 37);
-            this.loadButton.TabIndex = 5;
-            this.loadButton.TabStop = false;
-            this.loadButton.Text = "Load";
-            this.loadButton.UseVisualStyleBackColor = true;
-            this.loadButton.Visible = false;
-            this.loadButton.Click += new System.EventHandler(this.loadButton_Click);
             // 
             // stepButton
             // 
@@ -263,11 +255,59 @@
             this.applyRuleButton.UseVisualStyleBackColor = true;
             this.applyRuleButton.Click += new System.EventHandler(this.applyRuleButton_Click);
             // 
+            // aliveContrastNumeric
+            // 
+            this.aliveContrastNumeric.Location = new System.Drawing.Point(109, 77);
+            this.aliveContrastNumeric.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.aliveContrastNumeric.Name = "aliveContrastNumeric";
+            this.aliveContrastNumeric.Size = new System.Drawing.Size(56, 23);
+            this.aliveContrastNumeric.TabIndex = 20;
+            this.aliveContrastNumeric.Value = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.aliveContrastNumeric.ValueChanged += new System.EventHandler(this.aliveContrastNumeric_ValueChanged);
+            // 
+            // deadContrastNumeric
+            // 
+            this.deadContrastNumeric.Location = new System.Drawing.Point(171, 77);
+            this.deadContrastNumeric.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.deadContrastNumeric.Name = "deadContrastNumeric";
+            this.deadContrastNumeric.Size = new System.Drawing.Size(56, 23);
+            this.deadContrastNumeric.TabIndex = 21;
+            this.deadContrastNumeric.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.deadContrastNumeric.ValueChanged += new System.EventHandler(this.deadContrastNumeric_ValueChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(103, 57);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(121, 15);
+            this.label4.TabIndex = 22;
+            this.label4.Text = "Contrast (Alive/Dead)";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1109, 756);
+            this.ClientSize = new System.Drawing.Size(1140, 807);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.deadContrastNumeric);
+            this.Controls.Add(this.aliveContrastNumeric);
             this.Controls.Add(this.applyRuleButton);
             this.Controls.Add(this.randomRuleButton);
             this.Controls.Add(this.customRuleTextBox);
@@ -283,16 +323,18 @@
             this.Controls.Add(this.ruleComboBox);
             this.Controls.Add(this.pictureBox);
             this.Controls.Add(this.stepButton);
-            this.Controls.Add(this.loadButton);
             this.Controls.Add(this.numAliveLabel);
             this.Controls.Add(this.clearButton);
             this.Controls.Add(this.randomizeButton);
             this.Controls.Add(this.startButton);
+            this.DoubleBuffered = true;
             this.Name = "Form1";
             this.Text = "Form1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.aliveContrastNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.deadContrastNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -305,7 +347,6 @@
         private Button randomizeButton;
         private Button clearButton;
         private Label numAliveLabel;
-        private Button loadButton;
         private Button stepButton;
         private ComboBox ruleComboBox;
         private CheckBox useOpenCLCheckBox;
@@ -320,5 +361,8 @@
         private TextBox customRuleTextBox;
         private Button randomRuleButton;
         private Button applyRuleButton;
+        private NumericUpDown aliveContrastNumeric;
+        private NumericUpDown deadContrastNumeric;
+        private Label label4;
     }
 }

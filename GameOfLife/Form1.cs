@@ -17,7 +17,7 @@ namespace GameOfLife
         private int[,] nextCells;
         private bool invertColors = false;
 
-        private System.Windows.Forms.Timer stepper = new 
+        private System.Windows.Forms.Timer stepper = new
             System.Windows.Forms.Timer();
         private readonly List<NamedRule> rules = Rules.LifeRules;
         private NamedRule currentRule;
@@ -26,6 +26,8 @@ namespace GameOfLife
         private bool UseOpenCL = true;
         private Bitmap cellFieldImg;
         private PanZoomRenderer renderer;
+        private int curAliveAlpha = 255;
+        private int curDeadAlpha = 10;
 
         public Form1()
         {
@@ -268,16 +270,14 @@ namespace GameOfLife
         private unsafe void RedrawFieldImage()
         {
             const int alphaOffset = 3;
-            const int onAlpha = 255;
-            const int offAlpha = 10;
-            byte aliveAlpha = onAlpha;
-            byte deadAlpha = offAlpha;
+            byte aliveAlpha = (byte)curAliveAlpha;
+            byte deadAlpha = (byte)curDeadAlpha;
             int population = 0;
 
             if (invertColors)
             {
-                aliveAlpha = offAlpha;
-                deadAlpha = onAlpha;
+                aliveAlpha = (byte)curDeadAlpha;
+                deadAlpha = (byte)curAliveAlpha;
             }
 
             // Write the cells directly to the bitmap.
@@ -307,7 +307,7 @@ namespace GameOfLife
             renderer.Image.UnlockBits(data);
 
             numAliveLabel.Text = $"Population: {population}";
-           
+
             renderer.Refresh();
         }
 
@@ -355,11 +355,13 @@ namespace GameOfLife
             if (stepper.Enabled)
             {
                 stepper.Start();
+                startButton.BackColor = Color.LightGreen;
                 startButton.Text = "Stop";
             }
             else
             {
                 stepper.Stop();
+                startButton.BackColor = Color.LightCoral;
                 startButton.Text = "Start";
             }
         }
@@ -459,6 +461,22 @@ namespace GameOfLife
         {
             currentRule = new NamedRule("Custom", customRuleTextBox.Text.Trim());
             ruleComboBox.SelectedIndex = -1;
+        }
+
+        private void aliveContrastNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            curAliveAlpha = (int)aliveContrastNumeric.Value;
+            aliveContrastNumeric.Refresh();
+            if (!stepper.Enabled)
+                RedrawFieldImage();
+        }
+
+        private void deadContrastNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            curDeadAlpha = (int)deadContrastNumeric.Value;
+            aliveContrastNumeric.Refresh();
+            if (!stepper.Enabled)
+                RedrawFieldImage();
         }
     }
 }
