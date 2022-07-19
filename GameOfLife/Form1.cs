@@ -60,7 +60,7 @@ namespace GameOfLife
                 var customRules = JsonSerializer.Deserialize<List<NamedRule>>(File.ReadAllText(customRulesPath));
 
                 if (customRules != null)
-                    rules.AddRange(customRules);
+                    rules = rules.Union(customRules).ToList();
             }
 
             ruleComboBox.Items.Clear();

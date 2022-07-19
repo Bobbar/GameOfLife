@@ -46,7 +46,7 @@ namespace GameOfLife
             var platform = _device.Platform;
 
             _context = new ComputeContext(new[] { _device }, new ComputeContextPropertyList(platform), null, IntPtr.Zero);
-            _queue = new ComputeCommandQueue(_context, _device, ComputeCommandQueueFlags.Profiling);
+            _queue = new ComputeCommandQueue(_context, _device, ComputeCommandQueueFlags.None);
 
             var kernelPath = $@"{Environment.CurrentDirectory}\OCLKernels.cl";
             string clSource;

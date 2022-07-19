@@ -71,6 +71,7 @@ namespace GameOfLife
             viewPortGfx.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             viewPortGfx.InterpolationMode = InterpolationMode.NearestNeighbor;
             viewPortGfx.CompositingQuality = CompositingQuality.HighSpeed;
+            viewPortGfx.PixelOffsetMode = PixelOffsetMode.Half;
 
             viewPortGfx.ResetTransform();
             viewPortGfx.ScaleTransform(currentScale, currentScale);

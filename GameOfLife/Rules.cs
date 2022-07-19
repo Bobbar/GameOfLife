@@ -43,6 +43,12 @@ namespace GameOfLife
             new NamedRule("HoneyLife", "B38/S238"),
             new NamedRule("Squiggles", "B124567/S123456"),
             new NamedRule("Tiny Machines", "B2/S2345"),
+            new NamedRule("Tiny Machines 2", "B012378/S1234578"),
+            new NamedRule("Recycling Life", "B3/S1256"),
+            new NamedRule("Complex Oscillators", "B467/S123468"),
+            new NamedRule("Trees", "B3/S0134567"),
+            new NamedRule("Crystals", "B01238/S01235678"),
+            new NamedRule("Arcing Crystals", "B0348/S01234678"),
 
 
 
