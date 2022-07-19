@@ -57,6 +57,7 @@
             this.fillStepXTextBox = new System.Windows.Forms.TextBox();
             this.fillStepYTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.showGridCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.aliveContrastNumeric)).BeginInit();
@@ -385,11 +386,23 @@
             this.label6.TabIndex = 29;
             this.label6.Text = "Fill Steps (X/Y)";
             // 
+            // showGridCheckBox
+            // 
+            this.showGridCheckBox.AutoSize = true;
+            this.showGridCheckBox.Location = new System.Drawing.Point(144, 106);
+            this.showGridCheckBox.Name = "showGridCheckBox";
+            this.showGridCheckBox.Size = new System.Drawing.Size(80, 19);
+            this.showGridCheckBox.TabIndex = 30;
+            this.showGridCheckBox.Text = "Show Grid";
+            this.showGridCheckBox.UseVisualStyleBackColor = true;
+            this.showGridCheckBox.CheckedChanged += new System.EventHandler(this.showGridCheckBox_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1140, 807);
+            this.Controls.Add(this.showGridCheckBox);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.fillStepYTextBox);
             this.Controls.Add(this.fillStepXTextBox);
@@ -465,5 +478,6 @@
         private TextBox fillStepXTextBox;
         private TextBox fillStepYTextBox;
         private Label label6;
+        private CheckBox showGridCheckBox;
     }
 }

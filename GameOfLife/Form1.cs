@@ -17,6 +17,7 @@ namespace GameOfLife
         private int[,] cells;
         private int[,] nextCells;
         private bool invertColors = false;
+        private bool showGrid = false;
         private string customRulesPath = $@"{Environment.CurrentDirectory}\RuleList.txt";
 
         private System.Windows.Forms.Timer stepper = new System.Windows.Forms.Timer();
@@ -60,7 +61,7 @@ namespace GameOfLife
                 var customRules = JsonSerializer.Deserialize<List<NamedRule>>(File.ReadAllText(customRulesPath));
 
                 if (customRules != null)
-                    rules = rules.Union(customRules).ToList();
+                    rules = rules.Union(customRules, new NameRuleComparer()).ToList();
             }
 
             ruleComboBox.Items.Clear();
@@ -304,7 +305,8 @@ namespace GameOfLife
                 for (int y = 0; y < rows; y++)
                 {
                     var cell = cells[x, y];
-                    int pidx = (y * cols + x) * 4;
+                    int cellIdx = (y * cols + x);
+                    int pidx = cellIdx * 4;
 
                     if (cell == 1)
                     {
@@ -315,6 +317,9 @@ namespace GameOfLife
                     {
                         pixels[pidx + alphaOffset] = deadAlpha;
                     }
+
+                    if (showGrid)
+                        pixels[pidx + alphaOffset] -= (byte)(((x + y) % 2) * deadAlpha);
                 }
             }
 
@@ -562,6 +567,12 @@ namespace GameOfLife
             {
                 Fill(xStep, yStep);
             }
+        }
+
+        private void showGridCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            showGrid = showGridCheckBox.Checked;
+            RedrawFieldImage();
         }
     }
 }

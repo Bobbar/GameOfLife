@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,10 +13,10 @@ namespace GameOfLife
 
         public string RuleVal { get; set; }
 
-        public int Born 
+        public int Born
         {
-            get { return _rule.B; } 
-            set { _rule.B = value; } 
+            get { return _rule.B; }
+            set { _rule.B = value; }
         }
 
         public int Survive
@@ -24,9 +25,9 @@ namespace GameOfLife
             set { _rule.S = value; }
         }
 
-        public Rule Rule 
+        public Rule Rule
         {
-            get { return _rule; } 
+            get { return _rule; }
         }
 
         private Rule _rule;
@@ -72,6 +73,22 @@ namespace GameOfLife
                 _rule.S = 0;
                 throw;
             }
+        }
+    }
+
+    public class NameRuleComparer : IEqualityComparer<NamedRule>
+    {
+        public bool Equals(NamedRule? x, NamedRule? y)
+        {
+            if (x == null || y == null)
+                return false;
+
+            return x.Name == y.Name && x.RuleVal == y.RuleVal;
+        }
+
+        public int GetHashCode([DisallowNull] NamedRule obj)
+        {
+            return obj.Rule.B + obj.Rule.S;
         }
     }
 }
