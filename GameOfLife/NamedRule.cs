@@ -8,9 +8,28 @@ namespace GameOfLife
 {
     public class NamedRule
     {
-        public string Name;
-        public string RuleVal;
-        public Rule Rule;
+        public string Name { get; set; }
+
+        public string RuleVal { get; set; }
+
+        public int Born 
+        {
+            get { return _rule.B; } 
+            set { _rule.B = value; } 
+        }
+
+        public int Survive
+        {
+            get { return _rule.S; }
+            set { _rule.S = value; }
+        }
+
+        public Rule Rule 
+        {
+            get { return _rule; } 
+        }
+
+        private Rule _rule;
 
         public NamedRule(string name, string rule)
         {
@@ -20,28 +39,39 @@ namespace GameOfLife
             ParseRule(rule);
         }
 
+        public NamedRule() { }
+
         private void ParseRule(string rule)
         {
-            var bsRules = rule.Split('/');
-            var bRule = bsRules[0].Remove(0, 1).ToArray();
-            var sRule = bsRules[1].Remove(0, 1).ToArray();
-
-            int bVal = 0;
-            foreach (var v in bRule)
+            try
             {
-                int b = int.Parse(v.ToString());
-                bVal += 1 << b;
-            }
+                var bsRules = rule.Split('/');
+                var bRule = bsRules[0].Remove(0, 1).ToArray();
+                var sRule = bsRules[1].Remove(0, 1).ToArray();
 
-            int sVal = 0;
-            foreach (var v in sRule)
+                int bVal = 0;
+                foreach (var v in bRule)
+                {
+                    int b = int.Parse(v.ToString());
+                    bVal += 1 << b;
+                }
+
+                int sVal = 0;
+                foreach (var v in sRule)
+                {
+                    int s = int.Parse(v.ToString());
+                    sVal += 1 << s;
+                }
+
+                _rule.B = bVal;
+                _rule.S = sVal;
+            }
+            catch
             {
-                int s = int.Parse(v.ToString());
-                sVal += 1 << s;
+                _rule.B = 0;
+                _rule.S = 0;
+                throw;
             }
-
-            Rule.B = bVal;
-            Rule.S = sVal;
         }
     }
 }

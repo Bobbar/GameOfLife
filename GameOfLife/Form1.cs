@@ -3,7 +3,8 @@ using System.Drawing.Drawing2D;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace GameOfLife
 {
@@ -11,15 +12,15 @@ namespace GameOfLife
     {
         private int rows = 500;
         private int cols = 500;
-        private const int interval = 10;
+        private int interval = 10;
         private int stepsPerCycle = 1;
         private int[,] cells;
         private int[,] nextCells;
         private bool invertColors = false;
+        private string customRulesPath = $@"{Environment.CurrentDirectory}\RuleList.txt";
 
-        private System.Windows.Forms.Timer stepper = new
-            System.Windows.Forms.Timer();
-        private readonly List<NamedRule> rules = Rules.LifeRules;
+        private System.Windows.Forms.Timer stepper = new System.Windows.Forms.Timer();
+        private List<NamedRule> rules;
         private NamedRule currentRule;
         private OpenCLCompute ocl;
         private int oclGPUIdx = 0;
@@ -43,6 +44,8 @@ namespace GameOfLife
             InitOpenCL();
             PopRules();
 
+            cycleIntervalNumeric.Value = interval;
+            ruleComboBox.SelectedIndex = 0;
             rowsTextBox.Text = rows.ToString();
             colsTextBox.Text = cols.ToString();
             stepsNumericUpDown.Value = stepsPerCycle;
@@ -50,12 +53,22 @@ namespace GameOfLife
 
         private void PopRules()
         {
+            rules = Rules.LifeRules;
+
+            if (File.Exists(customRulesPath))
+            {
+                var customRules = JsonSerializer.Deserialize<List<NamedRule>>(File.ReadAllText(customRulesPath));
+
+                if (customRules != null)
+                    rules.AddRange(customRules);
+            }
+
+            ruleComboBox.Items.Clear();
+
             foreach (var rule in rules)
             {
                 ruleComboBox.Items.Add($"{rule.Name}  ( {rule.RuleVal} )");
             }
-
-            ruleComboBox.SelectedIndex = 8;
         }
 
         private void InitOpenCL()
@@ -263,6 +276,7 @@ namespace GameOfLife
 
         private void Stepper_Tick(object? sender, EventArgs e)
         {
+            stepper.Interval = interval;
             UpdateCells(stepsPerCycle, UseOpenCL);
             RedrawFieldImage();
         }
@@ -346,6 +360,59 @@ namespace GameOfLife
             S = String.Concat(S.OrderBy(c => c));
 
             return $"B{B}/S{S}";
+        }
+
+        private void SaveCustomRule()
+        {
+            using (var saveDialog = new SaveRuleDialog(currentRule))
+            {
+                if (saveDialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    currentRule.Name = saveDialog.RuleName;
+
+                    if (!File.Exists(customRulesPath))
+                    {
+                        var newRules = new List<NamedRule> { currentRule };
+
+                        var newList = JsonSerializer.Serialize(newRules, new JsonSerializerOptions { WriteIndented = true });
+
+                        if (newList != null)
+                            File.WriteAllText(customRulesPath, newList);
+                    }
+                    else
+                    {
+                        var currentList = JsonSerializer.Deserialize<List<NamedRule>>(File.ReadAllText(customRulesPath));
+
+                        if (currentList != null)
+                            currentList.Add(currentRule);
+
+                        var newList = JsonSerializer.Serialize(currentList, new JsonSerializerOptions { WriteIndented = true });
+
+                        if (newList != null)
+                            File.WriteAllText(customRulesPath, newList);
+                    }
+
+                    PopRules();
+
+                    ruleComboBox.SelectedIndex = rules.Count - 1;
+                }
+            }
+        }
+
+        private void Fill(int xStep, int yStep)
+        {
+            if (xStep > 0 && yStep > 0)
+            {
+                for (int x = 0; x < cols; x += xStep)
+                {
+                    for (int y = 0; y < rows; y += yStep)
+                    {
+                        cells[x, y] = 1;
+                    }
+                }
+
+                RedrawFieldImage();
+            }
         }
 
         private void startButton_Click(object sender, EventArgs e)
@@ -477,6 +544,24 @@ namespace GameOfLife
             aliveContrastNumeric.Refresh();
             if (!stepper.Enabled)
                 RedrawFieldImage();
+        }
+
+        private void saveRuleButton_Click(object sender, EventArgs e)
+        {
+            SaveCustomRule();
+        }
+
+        private void cycleIntervalNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            interval = (int)cycleIntervalNumeric.Value;
+        }
+
+        private void fillButton_Click(object sender, EventArgs e)
+        {
+            if (int.TryParse(fillStepXTextBox.Text.Trim(), out int xStep) && int.TryParse(fillStepYTextBox.Text.Trim(), out int yStep))
+            {
+                Fill(xStep, yStep);
+            }
         }
     }
 }

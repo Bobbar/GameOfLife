@@ -41,6 +41,8 @@ namespace GameOfLife
             new NamedRule("Gems", "B3457/S4568"),
             new NamedRule("Stains", "B3678/S235678"),
             new NamedRule("HoneyLife", "B38/S238"),
+            new NamedRule("Squiggles", "B124567/S123456"),
+            new NamedRule("Tiny Machines", "B2/S2345"),
 
 
 

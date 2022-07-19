@@ -50,10 +50,18 @@
             this.aliveContrastNumeric = new System.Windows.Forms.NumericUpDown();
             this.deadContrastNumeric = new System.Windows.Forms.NumericUpDown();
             this.label4 = new System.Windows.Forms.Label();
+            this.saveRuleButton = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
+            this.cycleIntervalNumeric = new System.Windows.Forms.NumericUpDown();
+            this.fillButton = new System.Windows.Forms.Button();
+            this.fillStepXTextBox = new System.Windows.Forms.TextBox();
+            this.fillStepYTextBox = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.aliveContrastNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.deadContrastNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cycleIntervalNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox
@@ -72,7 +80,7 @@
             // startButton
             // 
             this.startButton.BackColor = System.Drawing.Color.LightCoral;
-            this.startButton.Location = new System.Drawing.Point(66, 460);
+            this.startButton.Location = new System.Drawing.Point(66, 484);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(91, 37);
             this.startButton.TabIndex = 1;
@@ -83,7 +91,7 @@
             // 
             // randomizeButton
             // 
-            this.randomizeButton.Location = new System.Drawing.Point(66, 358);
+            this.randomizeButton.Location = new System.Drawing.Point(15, 380);
             this.randomizeButton.Name = "randomizeButton";
             this.randomizeButton.Size = new System.Drawing.Size(91, 45);
             this.randomizeButton.TabIndex = 2;
@@ -94,7 +102,7 @@
             // 
             // clearButton
             // 
-            this.clearButton.Location = new System.Drawing.Point(66, 576);
+            this.clearButton.Location = new System.Drawing.Point(66, 600);
             this.clearButton.Name = "clearButton";
             this.clearButton.Size = new System.Drawing.Size(91, 37);
             this.clearButton.TabIndex = 3;
@@ -115,7 +123,7 @@
             // 
             // stepButton
             // 
-            this.stepButton.Location = new System.Drawing.Point(66, 503);
+            this.stepButton.Location = new System.Drawing.Point(66, 527);
             this.stepButton.Name = "stepButton";
             this.stepButton.Size = new System.Drawing.Size(91, 37);
             this.stepButton.TabIndex = 6;
@@ -138,7 +146,7 @@
             this.useOpenCLCheckBox.AutoSize = true;
             this.useOpenCLCheckBox.Checked = true;
             this.useOpenCLCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.useOpenCLCheckBox.Location = new System.Drawing.Point(66, 640);
+            this.useOpenCLCheckBox.Location = new System.Drawing.Point(66, 664);
             this.useOpenCLCheckBox.Name = "useOpenCLCheckBox";
             this.useOpenCLCheckBox.Size = new System.Drawing.Size(91, 19);
             this.useOpenCLCheckBox.TabIndex = 8;
@@ -183,14 +191,14 @@
             // 
             // stepsNumericUpDown
             // 
-            this.stepsNumericUpDown.Location = new System.Drawing.Point(66, 431);
+            this.stepsNumericUpDown.Location = new System.Drawing.Point(18, 455);
             this.stepsNumericUpDown.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
             this.stepsNumericUpDown.Name = "stepsNumericUpDown";
-            this.stepsNumericUpDown.Size = new System.Drawing.Size(91, 23);
+            this.stepsNumericUpDown.Size = new System.Drawing.Size(87, 23);
             this.stepsNumericUpDown.TabIndex = 13;
             this.stepsNumericUpDown.Value = new decimal(new int[] {
             1,
@@ -202,7 +210,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(66, 413);
+            this.label2.Location = new System.Drawing.Point(18, 437);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(87, 15);
             this.label2.TabIndex = 14;
@@ -247,7 +255,7 @@
             // 
             // applyRuleButton
             // 
-            this.applyRuleButton.Location = new System.Drawing.Point(115, 227);
+            this.applyRuleButton.Location = new System.Drawing.Point(93, 227);
             this.applyRuleButton.Name = "applyRuleButton";
             this.applyRuleButton.Size = new System.Drawing.Size(75, 23);
             this.applyRuleButton.TabIndex = 19;
@@ -300,11 +308,95 @@
             this.label4.TabIndex = 22;
             this.label4.Text = "Contrast (Alive/Dead)";
             // 
+            // saveRuleButton
+            // 
+            this.saveRuleButton.Location = new System.Drawing.Point(182, 227);
+            this.saveRuleButton.Name = "saveRuleButton";
+            this.saveRuleButton.Size = new System.Drawing.Size(45, 23);
+            this.saveRuleButton.TabIndex = 23;
+            this.saveRuleButton.Text = "Save";
+            this.saveRuleButton.UseVisualStyleBackColor = true;
+            this.saveRuleButton.Click += new System.EventHandler(this.saveRuleButton_Click);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(133, 437);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(78, 15);
+            this.label5.TabIndex = 25;
+            this.label5.Text = "Cycle Interval";
+            // 
+            // cycleIntervalNumeric
+            // 
+            this.cycleIntervalNumeric.Location = new System.Drawing.Point(133, 455);
+            this.cycleIntervalNumeric.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.cycleIntervalNumeric.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.cycleIntervalNumeric.Name = "cycleIntervalNumeric";
+            this.cycleIntervalNumeric.Size = new System.Drawing.Size(78, 23);
+            this.cycleIntervalNumeric.TabIndex = 24;
+            this.cycleIntervalNumeric.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.cycleIntervalNumeric.ValueChanged += new System.EventHandler(this.cycleIntervalNumeric_ValueChanged);
+            // 
+            // fillButton
+            // 
+            this.fillButton.Location = new System.Drawing.Point(136, 402);
+            this.fillButton.Name = "fillButton";
+            this.fillButton.Size = new System.Drawing.Size(75, 23);
+            this.fillButton.TabIndex = 26;
+            this.fillButton.Text = "Fill";
+            this.fillButton.UseVisualStyleBackColor = true;
+            this.fillButton.Click += new System.EventHandler(this.fillButton_Click);
+            // 
+            // fillStepXTextBox
+            // 
+            this.fillStepXTextBox.Location = new System.Drawing.Point(136, 374);
+            this.fillStepXTextBox.Name = "fillStepXTextBox";
+            this.fillStepXTextBox.Size = new System.Drawing.Size(35, 23);
+            this.fillStepXTextBox.TabIndex = 27;
+            this.fillStepXTextBox.Text = "1";
+            // 
+            // fillStepYTextBox
+            // 
+            this.fillStepYTextBox.Location = new System.Drawing.Point(174, 374);
+            this.fillStepYTextBox.Name = "fillStepYTextBox";
+            this.fillStepYTextBox.Size = new System.Drawing.Size(35, 23);
+            this.fillStepYTextBox.TabIndex = 28;
+            this.fillStepYTextBox.Text = "1";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(136, 356);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(83, 15);
+            this.label6.TabIndex = 29;
+            this.label6.Text = "Fill Steps (X/Y)";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1140, 807);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.fillStepYTextBox);
+            this.Controls.Add(this.fillStepXTextBox);
+            this.Controls.Add(this.fillButton);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.cycleIntervalNumeric);
+            this.Controls.Add(this.saveRuleButton);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.deadContrastNumeric);
             this.Controls.Add(this.aliveContrastNumeric);
@@ -329,12 +421,14 @@
             this.Controls.Add(this.startButton);
             this.DoubleBuffered = true;
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Game of Life";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.aliveContrastNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.deadContrastNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cycleIntervalNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -364,5 +458,12 @@
         private NumericUpDown aliveContrastNumeric;
         private NumericUpDown deadContrastNumeric;
         private Label label4;
+        private Button saveRuleButton;
+        private Label label5;
+        private NumericUpDown cycleIntervalNumeric;
+        private Button fillButton;
+        private TextBox fillStepXTextBox;
+        private TextBox fillStepYTextBox;
+        private Label label6;
     }
 }
