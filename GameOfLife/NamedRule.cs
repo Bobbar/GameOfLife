@@ -25,6 +25,12 @@ namespace GameOfLife
             set { _rule.S = value; }
         }
 
+        public int States
+        {
+            get { return _rule.C; }
+            set { _rule.C = value; }
+        }
+
         public Rule Rule
         {
             get { return _rule; }
@@ -47,6 +53,13 @@ namespace GameOfLife
             try
             {
                 var bsRules = rule.Split('/');
+
+                if (bsRules.Length == 3)
+                {
+                    ParseRuleWithC(rule);
+                    return;
+                }
+
                 var bRule = bsRules[0].Remove(0, 1).ToArray();
                 var sRule = bsRules[1].Remove(0, 1).ToArray();
 
@@ -74,6 +87,49 @@ namespace GameOfLife
                 throw;
             }
         }
+
+        private void ParseRuleWithC(string rule)
+        {
+            try
+            {
+                var bscRules = rule.Split('/');
+                var bRule = bscRules[0].Remove(0, 1).ToArray();
+                var sRule = bscRules[1].Remove(0, 1).ToArray();
+                var cRule = bscRules[2];
+
+                if (cRule.Contains("C"))
+                    cRule = new string(bscRules[2].Remove(0, 1).ToArray());
+
+                int bVal = 0;
+                foreach (var v in bRule)
+                {
+                    int b = int.Parse(v.ToString());
+                    bVal += 1 << b;
+                }
+
+                int sVal = 0;
+                foreach (var v in sRule)
+                {
+                    int s = int.Parse(v.ToString());
+                    sVal += 1 << s;
+                }
+
+                int cVal = int.Parse(cRule);
+
+                _rule.B = bVal;
+                _rule.S = sVal;
+                _rule.C = cVal;
+
+            }
+            catch
+            {
+                _rule.B = 0;
+                _rule.S = 0;
+                _rule.C = 0;
+                throw;
+            }
+        }
+
     }
 
     public class NameRuleComparer : IEqualityComparer<NamedRule>
@@ -88,7 +144,7 @@ namespace GameOfLife
 
         public int GetHashCode([DisallowNull] NamedRule obj)
         {
-            return obj.Rule.B + obj.Rule.S;
+            return obj.Rule.B + obj.Rule.S + obj.Rule.C;
         }
     }
 }

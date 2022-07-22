@@ -25,7 +25,7 @@ namespace GameOfLife
         private NamedRule currentRule;
         private OpenCLCompute ocl;
         private int oclGPUIdx = 0;
-        private bool UseOpenCL = true;
+        private bool useOpenCL = true;
         private Bitmap cellFieldImg;
         private PanZoomRenderer renderer;
         private int curAliveAlpha = 255;
@@ -50,6 +50,7 @@ namespace GameOfLife
             rowsTextBox.Text = rows.ToString();
             colsTextBox.Text = cols.ToString();
             stepsNumericUpDown.Value = stepsPerCycle;
+            useOpenCLCheckBox.Checked = useOpenCL;
         }
 
         private void PopRules()
@@ -128,7 +129,8 @@ namespace GameOfLife
                             {
                                 var cell = cells[x, y];
                                 var nAlive = NumLivingNeighbors(x, y);
-                                nextCells[x, y] = GetState(cell, nAlive, currentRule.Rule);
+                                int next = GetState(cell, nAlive, currentRule.Rule);
+                                nextCells[x, y] = next;
                             }
                         }
                     });
@@ -143,7 +145,10 @@ namespace GameOfLife
         private int GetState(int current, int nAlive, Rule rules)
         {
             int next = 0;
-            int rule = current == 1 ? rules.S : rules.B;
+
+            // Select the appropriate rule based on the current state.
+            int rule = current >= 1 ? rules.S : rules.B;
+
             for (int i = 0; i < 9; i++)
             {
                 int ruleVal = 1 << i;
@@ -152,6 +157,15 @@ namespace GameOfLife
                     if (nAlive == i)
                         next = 1;
                 }
+            }
+
+            // Handle generational (multi-state) rules.
+            if (rules.C > 0)
+            {
+                if (next == 0 && current == 1)
+                    next = 2;
+                else if (current >= 2)
+                    next = ((current + 1) % rules.C);
             }
 
             return next;
@@ -278,13 +292,14 @@ namespace GameOfLife
         private void Stepper_Tick(object? sender, EventArgs e)
         {
             stepper.Interval = interval;
-            UpdateCells(stepsPerCycle, UseOpenCL);
+            UpdateCells(stepsPerCycle, useOpenCL);
             RedrawFieldImage();
         }
 
         private unsafe void RedrawFieldImage()
         {
             const int alphaOffset = 3;
+            const int redOffset = 2;
             byte aliveAlpha = (byte)curAliveAlpha;
             byte deadAlpha = (byte)curDeadAlpha;
             int population = 0;
@@ -308,14 +323,20 @@ namespace GameOfLife
                     int cellIdx = (y * cols + x);
                     int pidx = cellIdx * 4;
 
-                    if (cell == 1)
+                    if (cell >= 1)
                     {
                         pixels[pidx + alphaOffset] = aliveAlpha;
+
+                        // Draw gradient for generational rules.
+                        if (currentRule.Rule.C > 0)
+                            pixels[pidx + redOffset] = (byte)(cell * (255 / currentRule.Rule.C));
+
                         population++;
                     }
                     else
                     {
                         pixels[pidx + alphaOffset] = deadAlpha;
+                        pixels[pidx + redOffset] = 0;
                     }
 
                     if (showGrid)
@@ -330,13 +351,15 @@ namespace GameOfLife
             renderer.Refresh();
         }
 
-        private string GenerateRandomRule()
+        private string GenerateRandomRule(bool multiState)
         {
+            const int maxStates = 48;
             var rnd = new Random();
-            int bLen = rnd.Next(9);
-            int sLen = rnd.Next(9);
+            int bLen = rnd.Next(1, 9);
+            int sLen = rnd.Next(1, 9);
             string B = string.Empty;
             string S = string.Empty;
+            string C = string.Empty;
 
             for (int i = 0; i < bLen; i++)
             {
@@ -363,6 +386,12 @@ namespace GameOfLife
             }
 
             S = String.Concat(S.OrderBy(c => c));
+
+            if (multiState)
+            {
+                C = rnd.Next(maxStates).ToString();
+                return $"B{B}/S{S}/C{C}";
+            }
 
             return $"B{B}/S{S}";
         }
@@ -457,7 +486,7 @@ namespace GameOfLife
 
         private void stepButton_Click(object sender, EventArgs e)
         {
-            UpdateCells(1, UseOpenCL);
+            UpdateCells(1, useOpenCL);
             RedrawFieldImage();
         }
 
@@ -477,7 +506,7 @@ namespace GameOfLife
 
         private void useOpenCLCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            UseOpenCL = useOpenCLCheckBox.Checked;
+            useOpenCL = useOpenCLCheckBox.Checked;
         }
 
         private void applyButton_Click(object sender, EventArgs e)
@@ -509,8 +538,16 @@ namespace GameOfLife
         {
             var cellIdx = e.Location;
 
-            if (cellIdx.X >= 0 && cellIdx.X <= cols && cellIdx.Y >= 0 && cellIdx.Y <= rows)
-                cells[cellIdx.X, cellIdx.Y] = cells[cellIdx.X, cellIdx.Y] == 1 ? 0 : 1;
+            if (e.Button == MouseButtons.Right)
+            {
+                if (cellIdx.X >= 0 && cellIdx.X <= cols && cellIdx.Y >= 0 && cellIdx.Y <= rows)
+                    cells[cellIdx.X, cellIdx.Y] = cells[cellIdx.X, cellIdx.Y] >= 1 ? 0 : 1;
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                if (cellIdx.X >= 0 && cellIdx.X <= cols && cellIdx.Y >= 0 && cellIdx.Y <= rows)
+                    Debug.WriteLine($"{cellIdx}: {cells[cellIdx.X, cellIdx.Y]}");
+            }
 
             RedrawFieldImage();
         }
@@ -523,7 +560,7 @@ namespace GameOfLife
 
         private void randomRuleButton_Click(object sender, EventArgs e)
         {
-            var rndRule = GenerateRandomRule();
+            var rndRule = GenerateRandomRule(multiStateCheckBox.Checked);
             currentRule = new NamedRule("Random", rndRule);
             customRuleTextBox.Text = currentRule.RuleVal;
             ruleComboBox.SelectedIndex = -1;

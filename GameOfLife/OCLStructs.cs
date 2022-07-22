@@ -21,6 +21,7 @@ namespace GameOfLife
     {
         public int B;
         public int S;
+        public int C;
     }
 
 }

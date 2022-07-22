@@ -217,20 +217,17 @@ namespace GameOfLife
 
         private void PictureBox_MouseDown(object? sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Right)
-            {
-                var imgLoc = ScreenToPoint(e.Location);
-                var scalePoint = Helpers.ScalePoint(ScaleDirection.ToImage, imgLoc, targetImage.Size, targetSize);
-                var roundedPoint = new Point((int)Math.Floor(scalePoint.X), (int)Math.Floor(scalePoint.Y));
-
-                OnMouseDown(e, roundedPoint);
-            }
-
             if (e.Button == MouseButtons.Left)
             {
                 mouseMoveDownLoc = e.Location;
                 mouseDown = true;
             }
+
+            var imgLoc = ScreenToPoint(e.Location);
+            var scalePoint = Helpers.ScalePoint(ScaleDirection.ToImage, imgLoc, targetImage.Size, targetSize);
+            var roundedPoint = new Point((int)Math.Floor(scalePoint.X), (int)Math.Floor(scalePoint.Y));
+
+            OnMouseDown(e, roundedPoint);
         }
 
         public void Dispose()

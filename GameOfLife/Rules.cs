@@ -49,8 +49,8 @@ namespace GameOfLife
             new NamedRule("Trees", "B3/S0134567"),
             new NamedRule("Crystals", "B01238/S01235678"),
             new NamedRule("Arcing Crystals", "B0348/S01234678"),
-
-
+            new NamedRule("Star Wars", "B2/S345/C4"),
+            new NamedRule("Fireworks", "B13/S2/C21"),
 
         };
     }

@@ -58,6 +58,7 @@
             this.fillStepYTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.showGridCheckBox = new System.Windows.Forms.CheckBox();
+            this.multiStateCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.stepsNumericUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.aliveContrastNumeric)).BeginInit();
@@ -138,7 +139,7 @@
             this.ruleComboBox.FormattingEnabled = true;
             this.ruleComboBox.Location = new System.Drawing.Point(12, 169);
             this.ruleComboBox.Name = "ruleComboBox";
-            this.ruleComboBox.Size = new System.Drawing.Size(215, 23);
+            this.ruleComboBox.Size = new System.Drawing.Size(225, 23);
             this.ruleComboBox.TabIndex = 7;
             this.ruleComboBox.SelectedIndexChanged += new System.EventHandler(this.ruleComboBox_SelectedIndexChanged);
             // 
@@ -239,7 +240,7 @@
             // 
             // customRuleTextBox
             // 
-            this.customRuleTextBox.Location = new System.Drawing.Point(93, 198);
+            this.customRuleTextBox.Location = new System.Drawing.Point(103, 199);
             this.customRuleTextBox.Name = "customRuleTextBox";
             this.customRuleTextBox.Size = new System.Drawing.Size(134, 23);
             this.customRuleTextBox.TabIndex = 17;
@@ -256,7 +257,7 @@
             // 
             // applyRuleButton
             // 
-            this.applyRuleButton.Location = new System.Drawing.Point(93, 227);
+            this.applyRuleButton.Location = new System.Drawing.Point(103, 228);
             this.applyRuleButton.Name = "applyRuleButton";
             this.applyRuleButton.Size = new System.Drawing.Size(75, 23);
             this.applyRuleButton.TabIndex = 19;
@@ -311,7 +312,7 @@
             // 
             // saveRuleButton
             // 
-            this.saveRuleButton.Location = new System.Drawing.Point(182, 227);
+            this.saveRuleButton.Location = new System.Drawing.Point(192, 228);
             this.saveRuleButton.Name = "saveRuleButton";
             this.saveRuleButton.Size = new System.Drawing.Size(45, 23);
             this.saveRuleButton.TabIndex = 23;
@@ -397,11 +398,22 @@
             this.showGridCheckBox.UseVisualStyleBackColor = true;
             this.showGridCheckBox.CheckedChanged += new System.EventHandler(this.showGridCheckBox_CheckedChanged);
             // 
+            // multiStateCheckBox
+            // 
+            this.multiStateCheckBox.AutoSize = true;
+            this.multiStateCheckBox.Location = new System.Drawing.Point(13, 227);
+            this.multiStateCheckBox.Name = "multiStateCheckBox";
+            this.multiStateCheckBox.Size = new System.Drawing.Size(84, 19);
+            this.multiStateCheckBox.TabIndex = 31;
+            this.multiStateCheckBox.Text = "Multi-state";
+            this.multiStateCheckBox.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1140, 807);
+            this.Controls.Add(this.multiStateCheckBox);
             this.Controls.Add(this.showGridCheckBox);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.fillStepYTextBox);
@@ -479,5 +491,6 @@
         private TextBox fillStepYTextBox;
         private Label label6;
         private CheckBox showGridCheckBox;
+        private CheckBox multiStateCheckBox;
     }
 }
