@@ -9,7 +9,7 @@ using Cloo;
 using System.Drawing;
 
 
-namespace GameOfLife
+namespace GameOfLife.OpenCL
 {
     public class OpenCLCompute : IDisposable
     {
@@ -48,7 +48,7 @@ namespace GameOfLife
             _context = new ComputeContext(new[] { _device }, new ComputeContextPropertyList(platform), null, IntPtr.Zero);
             _queue = new ComputeCommandQueue(_context, _device, ComputeCommandQueueFlags.None);
 
-            var kernelPath = $@"{Environment.CurrentDirectory}\OCLKernels.cl";
+            var kernelPath = $@"{Environment.CurrentDirectory}\OpenCL\OCLKernels.cl";
             string clSource;
 
             using (StreamReader streamReader = new StreamReader(kernelPath))
@@ -66,7 +66,7 @@ namespace GameOfLife
             catch (BuildProgramFailureComputeException ex)
             {
                 string buildLog = _program.GetBuildLog(_device);
-                System.IO.File.WriteAllText("build_error.txt", buildLog);
+                File.WriteAllText("build_error.txt", buildLog);
                 Debug.WriteLine(buildLog);
                 throw;
             }
@@ -103,7 +103,7 @@ namespace GameOfLife
                 return _threadsPerBlock;
 
             int mod = len % _threadsPerBlock;
-            int padLen = (len - mod) + _threadsPerBlock;
+            int padLen = len - mod + _threadsPerBlock;
             return padLen;
         }
 
@@ -126,7 +126,7 @@ namespace GameOfLife
                 var temp = _gpuCellsA;
                 _gpuCellsA = _gpuCellsB;
                 _gpuCellsB = temp;
-            } 
+            }
 
             _queue.Finish();
 
@@ -138,7 +138,7 @@ namespace GameOfLife
             GCHandle destinationGCHandle = GCHandle.Alloc(dest, GCHandleType.Pinned);
             IntPtr destinationOffsetPtr = Marshal.UnsafeAddrOfPinnedArrayElement(dest, 0);
 
-            Cloo.Bindings.CL12.EnqueueReadBuffer(
+            Cloo.Bindings.CL10.EnqueueReadBuffer(
                   _queue.Handle,
                   _gpuCellsA.Handle,
                   true,

@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameOfLife
+namespace GameOfLife.Rendering
 {
-	public static class Helpers
-	{
+    public static class Helpers
+    {
         /// <summary>
         /// Returns the scaled size for an image display in a window of the specified size.
         /// </summary>
@@ -75,10 +75,10 @@ namespace GameOfLife
         {
             if (direction == ScaleDirection.ToImage)
                 //return new PointF((int)((point.X) * ratio.X), (int)((point.Y) * ratio.Y));
-                return new PointF(((point.X) * ratio.X), ((point.Y) * ratio.Y));
+                return new PointF(point.X * ratio.X, point.Y * ratio.Y);
 
             else
-                return new PointF((point.X / ratio.X), (point.Y / ratio.Y));
+                return new PointF(point.X / ratio.X, point.Y / ratio.Y);
 
         }
     }

@@ -5,6 +5,9 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using GameOfLife.OpenCL;
+using GameOfLife.Rules;
+using GameOfLife.Rendering;
 
 namespace GameOfLife
 {
@@ -55,7 +58,7 @@ namespace GameOfLife
 
         private void PopRules()
         {
-            rules = Rules.LifeRules;
+            rules = IncludedRules.LifeRules;
 
             if (File.Exists(customRulesPath))
             {
@@ -119,26 +122,31 @@ namespace GameOfLife
             }
             else
             {
-                for (int i = 0; i < steps; i++)
-                {
-                    ParallelHelpers.ParallelForSlim(cols, 8, (start, len) =>
-                    {
-                        for (int x = start; x < len; x++)
-                        {
-                            for (int y = 0; y < rows; y++)
-                            {
-                                var cell = cells[x, y];
-                                var nAlive = NumLivingNeighbors(x, y);
-                                int next = GetState(cell, nAlive, currentRule.Rule);
-                                nextCells[x, y] = next;
-                            }
-                        }
-                    });
+                ComputeNextState(steps);
+            }
+        }
 
-                    var tmp = cells;
-                    cells = nextCells;
-                    nextCells = tmp;
-                }
+        private void ComputeNextState(int steps)
+        {
+            for (int i = 0; i < steps; i++)
+            {
+                ParallelHelpers.ParallelForSlim(cols, 8, (start, len) =>
+                {
+                    for (int x = start; x < len; x++)
+                    {
+                        for (int y = 0; y < rows; y++)
+                        {
+                            var cell = cells[x, y];
+                            var nAlive = NumLivingNeighbors(x, y);
+                            int next = GetState(cell, nAlive, currentRule.Rule);
+                            nextCells[x, y] = next;
+                        }
+                    }
+                });
+
+                var tmp = cells;
+                cells = nextCells;
+                nextCells = tmp;
             }
         }
 
@@ -207,87 +215,7 @@ namespace GameOfLife
             RedrawFieldImage();
         }
 
-        private void ParseState()
-        {
-            //var file = $@"C:\Downloads\golly-4.1-win-64bit\golly-4.1-win-64bit\Patterns\Life-Like\replicator.rle";
-            //var file = $@"C:\Downloads\golly-4.1-win-64bit\golly-4.1-win-64bit\Patterns\Life-Like\spiral-growth.rle";
-            var file = $@"C:\Downloads\golly-4.1-win-64bit\golly-4.1-win-64bit\Patterns\Life\Spaceships\orthogonal.rle";
-
-            int startX = 0;
-            int startY = 0;
-            int sizeX = 0;
-            int sizeY = 0;
-            int x = 0;
-            int y = 0;
-            int padding = 200;
-            foreach (var line in File.ReadLines(file))
-            {
-                if (line[0] == 'x')
-                {
-                    var parms = line.Replace(" ", string.Empty).Split(',');
-                    string xStr = parms[0].Substring(2);
-                    string yStr = parms[1].Substring(2);
-                    sizeX = int.Parse(xStr);
-                    sizeY = int.Parse(yStr);
-                    //x = startX + padding / 2;
-                    //y = startY + padding / 2;
-
-                    startX = padding / 2;
-                    startY = padding / 2;
-                    x = startX;
-                    y = startY;
-
-                    cols = sizeX + padding;
-                    rows = sizeY + padding;
-                    InitCells();
-
-                    continue;
-                }
-                else if (line[0] == '#')
-                    continue;
-                else
-                {
-                    for (int i = 0; i < line.Length; i++)
-                    {
-                        int n = 1;
-                        string nStr = string.Empty;
-
-                        if (char.IsDigit(line[i]))
-                        {
-                            while (char.IsDigit(line[i]))
-                            {
-                                nStr += line[i].ToString();
-                                i++;
-                            }
-
-                            n = int.Parse(nStr);
-                        }
-
-                        switch (line[i])
-                        {
-                            case 'b':
-                                for (int j = 0; j < n; j++)
-                                    cells[x++, y] = 0;
-                                break;
-
-                            case 'o':
-                                for (int j = 0; j < n; j++)
-                                    cells[x++, y] = 1;
-                                break;
-
-                            case '$':
-                                x = startX;
-                                y += n;
-                                break;
-
-                            case '!':
-                                return;
-                        }
-                    }
-                }
-            }
-
-        }
+      
 
         private void Stepper_Tick(object? sender, EventArgs e)
         {
@@ -476,12 +404,6 @@ namespace GameOfLife
         private void clearButton_Click(object sender, EventArgs e)
         {
             Clear();
-        }
-
-        private void loadButton_Click(object sender, EventArgs e)
-        {
-            ParseState();
-            RedrawFieldImage();
         }
 
         private void stepButton_Click(object sender, EventArgs e)

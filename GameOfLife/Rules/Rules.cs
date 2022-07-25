@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GameOfLife.Rules;
 
-namespace GameOfLife
+namespace GameOfLife.Rules
 {
-    public static class Rules
+    public static class IncludedRules
     {
         // https://conwaylife.com/wiki/List_of_Life-like_cellular_automata
         public static List<NamedRule> LifeRules = new List<NamedRule>()

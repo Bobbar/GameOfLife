@@ -9,7 +9,7 @@ using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Diagnostics;
 
-namespace GameOfLife
+namespace GameOfLife.Rendering
 {
     public sealed class PanZoomRenderer : IDisposable
     {
@@ -99,7 +99,7 @@ namespace GameOfLife
 
         private PointF ScreenToPoint(Point point)
         {
-            return new PointF(((point.X / currentScale) - viewPortOffset.X - scaleOffset.X), ((point.Y / currentScale) - viewPortOffset.Y - scaleOffset.Y));
+            return new PointF(point.X / currentScale - viewPortOffset.X - scaleOffset.X, point.Y / currentScale - viewPortOffset.Y - scaleOffset.Y);
         }
 
         public void SetTargetSize(int width, int height)
@@ -142,11 +142,11 @@ namespace GameOfLife
             // Determine scaled distance from screen center.
             var targetCenter = new PointF(targetSize.Width / 2f, targetSize.Height / 2f);
             var center = windowCenter.Subtract(targetCenter);
-            var d = PointToScreen(new PointF((location.X - (center.X)), (location.Y - (center.Y))));
+            var d = PointToScreen(new PointF(location.X - center.X, location.Y - center.Y));
 
             // Apply the distplacement factor.
-            var dx = d.X * (scaleChangeMulti);
-            var dy = d.Y * (scaleChangeMulti);
+            var dx = d.X * scaleChangeMulti;
+            var dy = d.Y * scaleChangeMulti;
 
             // Flip the displacment direction as needed.
             if (zoomIn)
