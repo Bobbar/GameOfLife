@@ -28,7 +28,6 @@ namespace GameOfLife
             new NamedRule("Pedestrian Life", "B38/S23"),
             new NamedRule("Serviettes", "B234/S"),
             new NamedRule("Iceballs", "B25678/S5678"),
-            new NamedRule("Flock", "B3/S12"),
             new NamedRule("Coral", "B3/S45678"),
             new NamedRule("Long Life", "B345/S5"),
             new NamedRule("Mazectric with Mice", "B37/S1234"),
