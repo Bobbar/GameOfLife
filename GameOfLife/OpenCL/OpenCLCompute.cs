@@ -119,14 +119,13 @@ namespace GameOfLife.OpenCL
                 _computeNextKernel.SetMemoryArgument(0, _gpuCellsA);
                 _computeNextKernel.SetMemoryArgument(1, _gpuCellsB);
                 _computeNextKernel.SetValueArgument(2, _dims);
-                _computeNextKernel.SetValueArgument(3, len);
-                _computeNextKernel.SetValueArgument(4, rule);
+                _computeNextKernel.SetValueArgument(3, rule);
                 _queue.Execute(_computeNextKernel, null, new long[] { padDims.X, padDims.Y }, new long[] { _threadsPerBlock, _threadsPerBlock }, null);
 
                 var temp = _gpuCellsA;
                 _gpuCellsA = _gpuCellsB;
                 _gpuCellsB = temp;
-            }
+            } 
 
             _queue.Finish();
 

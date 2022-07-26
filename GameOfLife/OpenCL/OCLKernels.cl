@@ -1,4 +1,5 @@
-﻿typedef struct
+﻿
+typedef struct
 {
 	int B;
 	int S;
@@ -6,39 +7,40 @@
 
 } Rule;
 
+constant int2 N_OFFSET_LUT[] = { { -1,-1 }, { 0,-1 }, { 1,-1 }, { -1,0 }, { 1,0 }, { -1,1 }, { 0,1 }, { 1,1 } };
 
 int cIdx(int x, int y, int2 dims);
+int NumLivingNeighbors(int cellX, int cellY, int2 dims, global int* cells);
+int GetState(int current, int nAlive, Rule rules);
+
+
 int cIdx(int x, int y, int2 dims)
 {
 	return y * dims.x + x;
 }
 
-int NumLivingNeighbors(int cellX, int cellY, int2 dims, global int* cells);
+
 int NumLivingNeighbors(int cellX, int cellY, int2 dims, global int* cells)
 {
 	int living = 0;
 
-	for (int y = -1; y <= 1; y++)
+#pragma unroll(8)
+	for (int i = 0; i < 8; i++)
 	{
-		for (int x = -1; x <= 1; x++)
-		{
-			if (x == 0 && y == 0)
-				continue;
+		int2 offset = N_OFFSET_LUT[i];
+		int ox = cellX + offset.x;
+		int oy = cellY + offset.y;
+		int cellIdx = cIdx(ox, oy, dims);
 
-			int ox = cellX + x;
-			int oy = cellY + y;
-			int cellIdx = cIdx(ox, oy, dims);
-
-			if (ox >= 0 && oy >= 0 && ox < dims.x && oy < dims.y)
-				if (cells[cellIdx] == 1)
-					living++;
-		}
+		if (ox >= 0 && oy >= 0 && ox < dims.x && oy < dims.y)
+			if (cells[cellIdx] == 1)
+				living++;
 	}
 
 	return living;
 }
 
-int GetState(int current, int nAlive, Rule rules);
+
 int GetState(int current, int nAlive, Rule rules)
 {
 	int next = 0;
@@ -46,6 +48,7 @@ int GetState(int current, int nAlive, Rule rules)
 	// Select the appropriate rule based on the current state.
 	int rule = select(rules.B, rules.S, current);
 
+#pragma unroll(9)
 	for (int i = 0; i < 9; i++)
 	{
 		int ruleVal = 1 << i;
@@ -68,7 +71,8 @@ int GetState(int current, int nAlive, Rule rules)
 	return next;
 }
 
-__kernel void ComputeNextState(global int* curState, global int* nextState, int2 dims, int len, Rule rule)
+
+__kernel void ComputeNextState(global int* curState, global int* nextState, int2 dims, Rule rule)
 {
 	int x = get_global_id(0);
 	int y = get_global_id(1);

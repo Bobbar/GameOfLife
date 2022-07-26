@@ -17,6 +17,7 @@ namespace GameOfLife
         private int cols = 500;
         private int interval = 10;
         private int stepsPerCycle = 1;
+        private const int NUM_THREADS = 8;
         private int[,] cells;
         private int[,] nextCells;
         private bool invertColors = false;
@@ -130,7 +131,7 @@ namespace GameOfLife
         {
             for (int i = 0; i < steps; i++)
             {
-                ParallelHelpers.ParallelForSlim(cols, 8, (start, len) =>
+                ParallelHelpers.ParallelForSlim(cols, NUM_THREADS, (start, len) =>
                 {
                     for (int x = start; x < len; x++)
                     {
@@ -215,8 +216,6 @@ namespace GameOfLife
             RedrawFieldImage();
         }
 
-      
-
         private void Stepper_Tick(object? sender, EventArgs e)
         {
             stepper.Interval = interval;
@@ -239,38 +238,41 @@ namespace GameOfLife
             }
 
             // Write the cells directly to the bitmap.
-            var data = renderer.Image.LockBits(new Rectangle(0, 0, cols, rows), ImageLockMode.ReadWrite, renderer.Image.PixelFormat);
+            var data = renderer.Image.LockBits(new Rectangle(0, 0, cols, rows), ImageLockMode.WriteOnly, renderer.Image.PixelFormat);
 
             byte* pixels = (byte*)data.Scan0;
 
-            for (int x = 0; x < cols; x++)
+            ParallelHelpers.ParallelForSlim(cols, NUM_THREADS, (start, len) =>
             {
-                for (int y = 0; y < rows; y++)
+                for (int x = start; x < len; x++)
                 {
-                    var cell = cells[x, y];
-                    int cellIdx = (y * cols + x);
-                    int pidx = cellIdx * 4;
-
-                    if (cell >= 1)
+                    for (int y = 0; y < rows; y++)
                     {
-                        pixels[pidx + alphaOffset] = aliveAlpha;
+                        var cell = cells[x, y];
+                        int cellIdx = (y * cols + x);
+                        int pidx = cellIdx * 4;
 
-                        // Draw gradient for generational rules.
-                        if (currentRule.Rule.C > 0)
-                            pixels[pidx + redOffset] = (byte)(cell * (255 / currentRule.Rule.C));
+                        if (cell >= 1)
+                        {
+                            pixels[pidx + alphaOffset] = aliveAlpha;
 
-                        population++;
+                            // Draw gradient for generational rules.
+                            if (currentRule.Rule.C > 0)
+                                pixels[pidx + redOffset] = (byte)(cell * (255 / currentRule.Rule.C));
+
+                            population++;
+                        }
+                        else
+                        {
+                            pixels[pidx + alphaOffset] = deadAlpha;
+                            pixels[pidx + redOffset] = 0;
+                        }
+
+                        if (showGrid)
+                            pixels[pidx + alphaOffset] -= (byte)(((x + y) % 2) * deadAlpha);
                     }
-                    else
-                    {
-                        pixels[pidx + alphaOffset] = deadAlpha;
-                        pixels[pidx + redOffset] = 0;
-                    }
-
-                    if (showGrid)
-                        pixels[pidx + alphaOffset] -= (byte)(((x + y) % 2) * deadAlpha);
                 }
-            }
+            });
 
             renderer.Image.UnlockBits(data);
 
@@ -317,7 +319,7 @@ namespace GameOfLife
 
             if (multiState)
             {
-                C = rnd.Next(maxStates).ToString();
+                C = rnd.Next(2, maxStates).ToString();
                 return $"B{B}/S{S}/C{C}";
             }
 
@@ -462,12 +464,12 @@ namespace GameOfLife
 
             if (e.Button == MouseButtons.Right)
             {
-                if (cellIdx.X >= 0 && cellIdx.X <= cols && cellIdx.Y >= 0 && cellIdx.Y <= rows)
+                if (cellIdx.X >= 0 && cellIdx.X < cols && cellIdx.Y >= 0 && cellIdx.Y < rows)
                     cells[cellIdx.X, cellIdx.Y] = cells[cellIdx.X, cellIdx.Y] >= 1 ? 0 : 1;
             }
             else if (e.Button == MouseButtons.Left)
             {
-                if (cellIdx.X >= 0 && cellIdx.X <= cols && cellIdx.Y >= 0 && cellIdx.Y <= rows)
+                if (cellIdx.X >= 0 && cellIdx.X < cols && cellIdx.Y >= 0 && cellIdx.Y < rows)
                     Debug.WriteLine($"{cellIdx}: {cells[cellIdx.X, cellIdx.Y]}");
             }
 
